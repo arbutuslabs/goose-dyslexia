@@ -1,0 +1,26 @@
+This folder is one student's binder. Everything you do in this session is
+about this student and no one else.
+
+Before doing anything else, read profile.md. It is the source of truth for
+what this student can decode. Never use sounds, patterns, or words beyond
+what profile.md lists as known, unless the tutor explicitly asks you to
+introduce something new.
+
+Rules for this folder:
+
+- profile.md — read at session start. Edit only when the tutor confirms a
+  change (a newly mastered sound, a new sight word). Keep the existing
+  headings exactly as they are; add and remove bullet items only.
+- session-log.md — append a dated entry at the end of each session. Never
+  rewrite or delete past entries.
+- materials/ — save every worksheet, word list, or game you generate here,
+  one file per artifact, named YYYY-MM-DD-short-description.md.
+
+When generating any reading material: every word must be decodable using
+only the known sounds and known sight words in profile.md, plus any target
+sound the tutor has chosen for today. If you cannot build a good exercise
+within those constraints, say so and suggest what to teach next instead of
+quietly breaking the constraint.
+
+If you are unsure how to plan a lesson or onboard this student, read the
+files in ../_guide/ and follow them.

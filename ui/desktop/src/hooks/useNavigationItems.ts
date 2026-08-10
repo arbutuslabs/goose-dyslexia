@@ -1,7 +1,7 @@
 import {
   AppWindow,
+  GraduationCap,
   History,
-  MessageSquarePlus,
   Puzzle,
   Settings,
 } from 'lucide-react';
@@ -19,7 +19,7 @@ export interface NavItem {
 
 /** Top-level nav items (excluding Settings which is pinned to the bottom). */
 export const NAV_ITEMS: NavItem[] = [
-  { id: 'home', path: '/', label: 'New Chat', icon: MessageSquarePlus },
+  { id: 'home', path: '/', label: 'Students', icon: GraduationCap },
   { id: 'apps', path: '/apps', label: 'Apps', icon: AppWindow },
   { id: 'extensions', path: '/extensions', label: 'Extensions', icon: Puzzle },
   { id: 'sessions', path: '/sessions', label: 'Session History', icon: History },
@@ -38,7 +38,7 @@ export const SETTINGS_NAV_ITEM: NavItem = {
 const navItemMessages = defineMessages({
   home: {
     id: 'navigation.itemHome',
-    defaultMessage: 'New Chat',
+    defaultMessage: 'Students',
   },
   apps: {
     id: 'navigation.itemApps',

@@ -84,7 +84,7 @@ const MENU_TRANSLATIONS_ZH_CN: Record<string, string> = {
   Cut: '剪切',
   Copy: '复制',
   Paste: '粘贴',
-  // Arbutus Labs-added items
+  // Lira-added items
   'New Window': '新建窗口',
   Settings: '设置',
   'Find…': '查找…',
@@ -96,11 +96,11 @@ const MENU_TRANSLATIONS_ZH_CN: Record<string, string> = {
   'New Chat Window': '新建聊天窗口',
   'Open Directory...': '打开目录…',
   'Recent Directories': '最近的目录',
-  'Focus Arbutus Labs Window': '聚焦 Arbutus Labs 窗口',
+  'Focus Lira Window': '聚焦 Lira 窗口',
   'Quick Launcher': '快速启动器',
   'Always on Top': '窗口置顶',
   'Toggle Navigation': '切换导航',
-  'About Arbutus Labs': '关于 Arbutus Labs',
+  'About Lira': '关于 Lira',
   // Electron's default role-based labels we want to translate as well.
   // (The menu role itself still provides the correct behaviour; only the
   // display string is overridden.)
@@ -126,7 +126,7 @@ const MENU_TRANSLATIONS_ZH_CN: Record<string, string> = {
   'Bring All to Front': '全部置于最前',
   'Emoji & Symbols': '表情符号',
   'Start Dictation…': '开始听写…',
-  'Hide Arbutus Labs': '隐藏 Arbutus Labs',
+  'Hide Lira': '隐藏 Lira',
   'Hide Others': '隐藏其他',
   'Show All': '全部显示',
   Services: '服务',
@@ -765,7 +765,7 @@ app.on('open-url', async (_event, url) => {
 app.on('will-finish-launching', () => {
   if (process.platform === 'darwin') {
     app.setAboutPanelOptions({
-      applicationName: 'Arbutus Labs',
+      applicationName: 'Lira',
       applicationVersion: app.getVersion(),
     });
   }
@@ -820,7 +820,7 @@ async function handleFileOpen(filePath: string) {
 
     // Show user-friendly error notification
     new Notification({
-      title: 'Arbutus Labs',
+      title: 'Lira',
       body: `Could not open directory: ${path.basename(filePath)}`,
     }).show();
   }
@@ -1195,7 +1195,7 @@ const createChat = async (
       log.error('goose serve failed to start', error);
       dialog.showMessageBoxSync({
         type: 'error',
-        title: 'Arbutus Labs Failed to Start',
+        title: 'Lira Failed to Start',
         message: 'The backend server failed to start.',
         detail: [
           'Backend: goose serve',
@@ -2365,6 +2365,21 @@ ipcMain.handle('list-files', async (_event, dirPath, extension) => {
   }
 });
 
+// The OS desktop folder, where the tutor workspace lives.
+ipcMain.handle('get-desktop-path', () => app.getPath('desktop'));
+
+// Move a file or folder to the OS trash. Recoverable by design: used for
+// deleting student binders, which hold the only copy of their records.
+ipcMain.handle('trash-item', async (_event, targetPath) => {
+  try {
+    await shell.trashItem(expandTilde(targetPath));
+    return true;
+  } catch (error) {
+    console.error('Error trashing item:', error);
+    return false;
+  }
+});
+
 // Directory listing with entry types, for the file browser tree view.
 // Kept separate from 'list-files' (which returns bare names) so existing
 // callers like the @-mention popover are unaffected.
@@ -2554,7 +2569,7 @@ async function appMain() {
 
   const shortcuts = getKeyboardShortcuts(settings);
 
-  const appMenu = menu?.items.find((item) => item.label === 'Arbutus Labs');
+  const appMenu = menu?.items.find((item) => item.label === 'Lira');
   if (appMenu?.submenu) {
     appMenu.submenu.insert(1, new MenuItem({ type: 'separator' }));
     if (shortcuts.settings) {
@@ -2682,7 +2697,7 @@ async function appMain() {
     if (shortcuts.focusWindow) {
       fileMenu.submenu.append(
         new MenuItem({
-          label: menuT('Focus Arbutus Labs Window'),
+          label: menuT('Focus Lira Window'),
           accelerator: shortcuts.focusWindow,
           click() {
             focusWindow();
@@ -2789,13 +2804,13 @@ async function appMain() {
         helpMenu.submenu.append(new MenuItem({ type: 'separator' }));
       }
 
-      // Create the About Arbutus Labs menu item with a submenu
+      // Create the About Lira menu item with a submenu
       const aboutGooseMenuItem = new MenuItem({
-        label: menuT('About Arbutus Labs'),
+        label: menuT('About Lira'),
         submenu: Menu.buildFromTemplate([]), // Start with an empty submenu for About
       });
 
-      // Add the Version menu item (display only) to the About Arbutus Labs submenu
+      // Add the Version menu item (display only) to the About Lira submenu
       if (aboutGooseMenuItem.submenu) {
         aboutGooseMenuItem.submenu.append(
           new MenuItem({
@@ -3122,7 +3137,7 @@ app.whenReady().then(async () => {
   try {
     await appMain();
   } catch (error) {
-    dialog.showErrorBox('Arbutus Labs Error', `Failed to create main window: ${error}`);
+    dialog.showErrorBox('Lira Error', `Failed to create main window: ${error}`);
     app.quit();
   }
 });

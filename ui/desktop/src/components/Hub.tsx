@@ -1,36 +1,51 @@
 /**
  * Hub Component
  *
- * The empty-chat landing screen. Visually it's "Pair with no messages yet" —
- * a large time + greeting above a centered, narrower ChatInput. Submitting
- * creates a session and navigates to /pair so the rest of the chat lifecycle
- * lives there.
+ * The landing screen: pick a student to start a session, or add a new one.
+ * Each student is a folder on disk; selecting one creates a session rooted
+ * there and navigates to /pair, where the rest of the chat lifecycle lives.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { GraduationCap, Plus, Trash2 } from 'lucide-react';
 import { defineMessages, useIntl } from '../i18n';
+import {
+  createStudent,
+  deleteStudent,
+  getWorkspaceRoot,
+  isWorkspaceSetUp,
+  listStudents,
+  sanitizeStudentName,
+  scaffoldWorkspace,
+  type StudentEntry,
+} from './hub/tutorWorkspace';
 import { AppEvents } from '../constants/events';
-import ChatInput from './ChatInput';
-import { ChatInputCard } from './ChatInputCard';
 import { ChatState } from '../types/chatState';
 import 'react-toastify/dist/ReactToastify.css';
 import { View, ViewOptions } from '../utils/navigationUtils';
 import { useConfig } from './ConfigContext';
-import { getInitialWorkingDir } from '../utils/workingDir';
 import { createSession } from '../sessions';
 import LoadingGoose from './LoadingGoose';
-import { UserInput } from '../types/message';
-import {
-  createNextChatExtensionDraft,
-  selectNextChatExtensions,
-  type NextChatExtensionDraft,
-} from '../utils/nextChatExtensions';
 
 const i18n = defineMessages({
   goodMorning: { id: 'hub.goodMorning', defaultMessage: 'Good morning' },
   goodAfternoon: { id: 'hub.goodAfternoon', defaultMessage: 'Good afternoon' },
   goodEvening: { id: 'hub.goodEvening', defaultMessage: 'Good evening' },
 });
+
+type WorkspaceState =
+  | { status: 'loading' }
+  | { status: 'error'; message: string }
+  | { status: 'needs-setup'; root: string }
+  | { status: 'ready'; root: string; students: StudentEntry[] };
+
+/** First message sent when opening a session for an existing student. */
+const sessionKickoff = (name: string) =>
+  `Starting a session with ${name}. Read their profile.md and the recent session log, then help me get started.`;
+
+/** First message sent right after a new student binder is created. */
+const onboardingKickoff = (name: string) =>
+  `I just added ${name} as a new student. Their profile.md is empty — walk me through onboarding them.`;
 
 function useClock(): { time: string; meridiem: string; hour: number } {
   const [now, setNow] = useState(() => new Date());
@@ -54,11 +69,7 @@ export default function Hub({
 }) {
   const intl = useIntl();
   const { extensionsList } = useConfig();
-  const [workingDir, setWorkingDir] = useState(getInitialWorkingDir());
   const [isCreatingSession, setIsCreatingSession] = useState(false);
-  const [nextChatExtensionDraft, setNextChatExtensionDraft] =
-    useState<NextChatExtensionDraft | null>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
   const { time, meridiem, hour } = useClock();
 
   const greeting = useMemo(() => {
@@ -67,56 +78,104 @@ export default function Hub({
     return intl.formatMessage(i18n.goodEvening);
   }, [intl, hour]);
 
-  const draftForMenu = useMemo(
-    () => nextChatExtensionDraft ?? createNextChatExtensionDraft(extensionsList),
-    [extensionsList, nextChatExtensionDraft]
-  );
+  // Tutor workspace: student folders under Desktop/Lira Tutor.
+  const [workspace, setWorkspace] = useState<WorkspaceState>({ status: 'loading' });
+  const [addingStudent, setAddingStudent] = useState(false);
+  const [newStudentName, setNewStudentName] = useState('');
+  const [studentError, setStudentError] = useState<string | null>(null);
 
-  // rAF is more reliable than autoFocus across async render boundaries.
-  useEffect(() => {
-    const frameId = requestAnimationFrame(() => {
-      inputRef.current?.focus();
-    });
-    return () => cancelAnimationFrame(frameId);
-  }, []);
-
-  const handleNextChatExtensionDraftChange = useCallback((draft: NextChatExtensionDraft) => {
-    setNextChatExtensionDraft(draft);
-  }, []);
-
-  const handleSubmit = async (input: UserInput) => {
-    const { msg: userMessage, images } = input;
-    if (!(images.length > 0 || userMessage.trim()) || isCreatingSession) return;
-
-    setIsCreatingSession(true);
-
+  const refreshWorkspace = useCallback(async () => {
     try {
-      const selectedExtensions = nextChatExtensionDraft
-        ? selectNextChatExtensions(extensionsList, nextChatExtensionDraft)
-        : [];
-      const sessionOptions =
-        selectedExtensions.length > 0
-          ? { extensionConfigs: selectedExtensions }
-          : { allExtensions: extensionsList };
+      const root = await getWorkspaceRoot();
+      if (await isWorkspaceSetUp(root)) {
+        setWorkspace({ status: 'ready', root, students: await listStudents(root) });
+      } else {
+        setWorkspace({ status: 'needs-setup', root });
+      }
+    } catch (error) {
+      console.error('Failed to load tutor workspace:', error);
+      setWorkspace({ status: 'error', message: 'Could not load your workspace folder.' });
+    }
+  }, []);
 
-      const session = await createSession(workingDir, sessionOptions);
-      setNextChatExtensionDraft(null);
+  useEffect(() => {
+    void refreshWorkspace();
+  }, [refreshWorkspace]);
 
+  /** Create a session rooted in a student's folder and open it with a kickoff message. */
+  const startSessionInDir = async (dir: string, kickoff: string) => {
+    if (isCreatingSession) return;
+    setIsCreatingSession(true);
+    try {
+      const session = await createSession(dir, { allExtensions: extensionsList });
       window.dispatchEvent(new CustomEvent(AppEvents.SESSION_CREATED));
       window.dispatchEvent(
         new CustomEvent(AppEvents.ADD_ACTIVE_SESSION, {
-          detail: { sessionId: session.id, initialMessage: { msg: userMessage, images } },
+          detail: { sessionId: session.id, initialMessage: { msg: kickoff, images: [] } },
         })
       );
-
       setView('pair', {
         disableAnimation: true,
         resumeSessionId: session.id,
-        initialMessage: { msg: userMessage, images },
+        initialMessage: { msg: kickoff, images: [] },
       });
     } catch (error) {
       console.error('Failed to create session:', error);
       setIsCreatingSession(false);
+    }
+  };
+
+  const handleSetupWorkspace = async () => {
+    if (workspace.status !== 'needs-setup') return;
+    try {
+      await scaffoldWorkspace(workspace.root);
+      await refreshWorkspace();
+    } catch (error) {
+      console.error('Failed to set up workspace:', error);
+      setWorkspace({ status: 'error', message: 'Could not create the workspace folder.' });
+    }
+  };
+
+  const handleDeleteStudent = async (student: StudentEntry) => {
+    const { response } = await window.electron.showMessageBox({
+      type: 'warning',
+      title: 'Remove student',
+      message: `Remove ${student.name}?`,
+      detail:
+        `Their profile, session log, and all materials will be moved to the Trash. ` +
+        `You can put them back from there if this was a mistake.`,
+      buttons: ['Cancel', 'Move to Trash'],
+      defaultId: 0,
+    });
+    if (response !== 1) return;
+
+    const ok = await deleteStudent(student);
+    if (!ok) {
+      setStudentError(`Could not remove ${student.name}.`);
+      return;
+    }
+    await refreshWorkspace();
+  };
+
+  const handleCreateStudent = async () => {
+    if (workspace.status !== 'ready') return;
+    const name = sanitizeStudentName(newStudentName);
+    if (!name) {
+      setStudentError('Please enter a name.');
+      return;
+    }
+    if (workspace.students.some((s) => s.name.toLowerCase() === name.toLowerCase())) {
+      setStudentError(`You already have a student named ${name}.`);
+      return;
+    }
+    try {
+      const student = await createStudent(workspace.root, name);
+      setAddingStudent(false);
+      setNewStudentName('');
+      setStudentError(null);
+      await startSessionInDir(student.path, onboardingKickoff(student.name));
+    } catch (error) {
+      setStudentError(error instanceof Error ? error.message : 'Could not create the student.');
     }
   };
 
@@ -131,27 +190,105 @@ export default function Hub({
         </div>
         <p className="text-xl text-text-secondary mb-6">{greeting}</p>
 
-        <ChatInputCard>
-          <ChatInput
-            sessionId={null}
-            handleSubmit={handleSubmit}
-            chatState={isCreatingSession ? ChatState.LoadingConversation : ChatState.Idle}
-            onStop={() => {}}
-            initialValue=""
-            setView={setView}
-            totalTokens={0}
-            accumulatedInputTokens={0}
-            accumulatedOutputTokens={0}
-            droppedFiles={[]}
-            onFilesProcessed={() => {}}
-            messages={[]}
-            disableAnimation={false}
-            onWorkingDirChange={setWorkingDir}
-            inputRef={inputRef}
-            nextChatExtensionDraft={draftForMenu}
-            onNextChatExtensionDraftChange={handleNextChatExtensionDraftChange}
-          />
-        </ChatInputCard>
+        {workspace.status === 'error' && (
+          <p className="mb-6 text-sm text-text-muted">{workspace.message}</p>
+        )}
+
+        {workspace.status === 'needs-setup' && (
+          <button
+            onClick={handleSetupWorkspace}
+            className="mb-6 w-full rounded-xl border border-border-primary p-5 text-left transition-colors hover:bg-background-tertiary/60"
+          >
+            <div className="mb-1 text-base font-medium text-text-primary">
+              Set up your tutoring workspace
+            </div>
+            <div className="text-sm text-text-muted">
+              Creates a folder on your desktop where each student gets their own binder:
+              profile, session log, and materials.
+            </div>
+          </button>
+        )}
+
+        {workspace.status === 'ready' && (
+          <div className="mb-6">
+            <p className="mb-3 text-sm text-text-muted">
+              {workspace.students.length > 0
+                ? 'Who are you working with?'
+                : 'Add your first student to get started.'}
+            </p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {workspace.students.map((student) => (
+                <div key={student.path} className="group relative">
+                  <button
+                    disabled={isCreatingSession}
+                    onClick={() =>
+                      void startSessionInDir(student.path, sessionKickoff(student.name))
+                    }
+                    className="flex w-full items-center gap-2 rounded-xl border border-border-primary p-4 pr-9 text-left transition-colors hover:bg-background-tertiary/60 disabled:opacity-50"
+                    title={student.path}
+                  >
+                    <GraduationCap className="h-5 w-5 flex-shrink-0 text-text-muted" />
+                    <span className="truncate text-sm font-medium text-text-primary">
+                      {student.name}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => void handleDeleteStudent(student)}
+                    aria-label={`Remove ${student.name}`}
+                    title={`Remove ${student.name}`}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-text-muted opacity-0 transition-all hover:bg-background-tertiary/60 hover:text-text-primary focus-visible:opacity-100 group-hover:opacity-100"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              {addingStudent ? (
+                <form
+                  className="col-span-2 flex items-center gap-2 rounded-xl border border-border-primary p-3 sm:col-span-1"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void handleCreateStudent();
+                  }}
+                >
+                  <input
+                    autoFocus
+                    value={newStudentName}
+                    onChange={(e) => {
+                      setNewStudentName(e.target.value);
+                      setStudentError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        setAddingStudent(false);
+                        setNewStudentName('');
+                        setStudentError(null);
+                      }
+                    }}
+                    placeholder="Student's name"
+                    className="min-w-0 flex-1 bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted"
+                  />
+                  <button
+                    type="submit"
+                    className="flex-shrink-0 text-sm font-medium text-text-primary hover:opacity-80"
+                  >
+                    Add
+                  </button>
+                </form>
+              ) : (
+                <button
+                  disabled={isCreatingSession}
+                  onClick={() => setAddingStudent(true)}
+                  className="flex items-center gap-2 rounded-xl border border-dashed border-border-primary p-4 text-left text-text-muted transition-colors hover:bg-background-tertiary/60 hover:text-text-primary disabled:opacity-50"
+                >
+                  <Plus className="h-5 w-5 flex-shrink-0" />
+                  <span className="text-sm font-medium">New student</span>
+                </button>
+              )}
+            </div>
+            {studentError && <p className="mt-2 text-sm text-text-muted">{studentError}</p>}
+          </div>
+        )}
+
       </div>
 
       {isCreatingSession && (

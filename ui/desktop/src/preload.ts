@@ -129,6 +129,8 @@ type ElectronAPI = {
   ensureDirectory: (dirPath: string) => Promise<boolean>;
   listFiles: (dirPath: string, extension?: string) => Promise<string[]>;
   listDirectory: (dirPath: string) => Promise<DirectoryEntry[]>;
+  getDesktopPath: () => Promise<string>;
+  trashItem: (targetPath: string) => Promise<boolean>;
   getAllowedExtensions: () => Promise<string[]>;
   getPathForFile: (file: File) => string;
   setMenuBarIcon: (show: boolean) => Promise<boolean>;
@@ -227,6 +229,8 @@ const electronAPI: ElectronAPI = {
   listFiles: (dirPath: string, extension?: string) =>
     ipcRenderer.invoke('list-files', dirPath, extension),
   listDirectory: (dirPath: string) => ipcRenderer.invoke('list-directory', dirPath),
+  getDesktopPath: () => ipcRenderer.invoke('get-desktop-path'),
+  trashItem: (targetPath: string) => ipcRenderer.invoke('trash-item', targetPath),
   getPathForFile: (file: File) => webUtils.getPathForFile(file),
   getAllowedExtensions: () => ipcRenderer.invoke('get-allowed-extensions'),
   setMenuBarIcon: (show: boolean) => ipcRenderer.invoke('set-menu-bar-icon', show),
