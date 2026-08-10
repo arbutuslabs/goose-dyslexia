@@ -1701,10 +1701,10 @@
     "defaultMessage": "Ask goose anything..."
   },
   "loadingGoose.compacting": {
-    "defaultMessage": "arbutus labs is compacting the conversation..."
+    "defaultMessage": "Lira is compacting the conversation..."
   },
   "loadingGoose.idle": {
-    "defaultMessage": "arbutus labs is working on it…"
+    "defaultMessage": "Lira is working on it…"
   },
   "loadingGoose.loadingConversation": {
     "defaultMessage": "loading conversation..."
@@ -1713,13 +1713,13 @@
     "defaultMessage": "restarting session..."
   },
   "loadingGoose.streaming": {
-    "defaultMessage": "arbutus labs is working on it…"
+    "defaultMessage": "Lira is working on it…"
   },
   "loadingGoose.thinking": {
-    "defaultMessage": "arbutus labs is thinking…"
+    "defaultMessage": "Lira is thinking…"
   },
   "loadingGoose.waiting": {
-    "defaultMessage": "arbutus labs is waiting…"
+    "defaultMessage": "Lira is waiting…"
   },
   "localInferenceSettings.deleteConfirm": {
     "defaultMessage": "Delete this model? You can re-download it later."

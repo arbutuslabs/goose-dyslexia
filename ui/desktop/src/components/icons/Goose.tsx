@@ -4,7 +4,7 @@ export function Goose({ className = '' }) {
   return (
     <img
       src={LogoInline}
-      alt="Arbutus Labs"
+      alt="Lira"
       className={className}
       draggable={false}
     />

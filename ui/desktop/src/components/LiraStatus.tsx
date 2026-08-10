@@ -1,16 +1,16 @@
 import statusGlyph from '../images/status-glyph.png';
 
-interface ArbutusStatusProps {
+interface LiraStatusProps {
   className?: string;
 }
 
 /**
- * Arbutus Labs mark shown as the status icon while goose is working.
+ * Lira mark shown as the status icon while goose is working.
  * Gentle pulse via motion-safe so reduced-motion users get a static icon.
  * The artwork is black line art on transparency, so invert it in dark mode.
  * To change the artwork, replace images/status-glyph.png (64x64).
  */
-export default function ArbutusStatus({ className = '' }: ArbutusStatusProps) {
+export default function LiraStatus({ className = '' }: LiraStatusProps) {
   return (
     <img
       src={statusGlyph}

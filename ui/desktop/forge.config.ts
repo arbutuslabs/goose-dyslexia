@@ -7,8 +7,8 @@ const isLinuxVulkanBuild = process.env.GOOSE_DESKTOP_LINUX_VARIANT === 'vulkan';
 let cfg = {
   asar: true,
   extraResource: ['src/bin', 'src/images', 'src/app-update.yml'],
-  name: 'ArbutusLabs',
-  executableName: 'ArbutusLabs',
+  name: 'Lira',
+  executableName: 'Lira',
   icon: 'src/images/icon',
   // Windows specific configuration
   win32: {
@@ -21,14 +21,14 @@ let cfg = {
   // Protocol registration
   protocols: [
     {
-      name: 'ArbutusLabsProtocol',
+      name: 'LiraProtocol',
       schemes: ['goose'],
     },
   ],
   // macOS Info.plist extensions for drag-and-drop support
   extendInfo: {
     // Display name shown in the Dock and app switcher
-    CFBundleDisplayName: 'Arbutus Labs',
+    CFBundleDisplayName: 'Lira',
     // Document types for drag-and-drop support onto dock icon
     CFBundleDocumentTypes: [
       {
@@ -40,9 +40,9 @@ let cfg = {
     ],
     // Usage descriptions for macOS TCC (Transparency, Consent, and Control)
     NSMicrophoneUsageDescription:
-      'Arbutus Labs needs access to your microphone for voice dictation.',
+      'Lira needs access to your microphone for voice dictation.',
     NSAppleEventsUsageDescription:
-      'Arbutus Labs needs access to send Apple Events to control other apps on your behalf.',
+      'Lira needs access to send Apple Events to control other apps on your behalf.',
   },
 };
 
@@ -75,12 +75,12 @@ module.exports = {
           let plist = fs.readFileSync(plistPath, 'utf8');
           const before = plist;
           plist = plist.replace(
-            '<key>CFBundleDisplayName</key>\n    <string>ArbutusLabs</string>',
-            '<key>CFBundleDisplayName</key>\n    <string>Arbutus Labs</string>'
+            '<key>CFBundleDisplayName</key>\n    <string>Lira</string>',
+            '<key>CFBundleDisplayName</key>\n    <string>Lira</string>'
           );
           if (plist !== before) {
             fs.writeFileSync(plistPath, plist);
-            console.log(`Updated ${plistPath} CFBundleDisplayName to 'Arbutus Labs'`);
+            console.log(`Updated ${plistPath} CFBundleDisplayName to 'Lira'`);
           }
         }
       }
@@ -113,10 +113,10 @@ module.exports = {
     {
       name: '@electron-forge/maker-deb',
       config: {
-        name: 'ArbutusLabs',
-        bin: 'ArbutusLabs',
-        maintainer: 'Arbutus Labs (Custom Goose Distribution)',
-        homepage: 'https://arbutuslabs.ca',
+        name: 'Lira',
+        bin: 'Lira',
+        maintainer: 'Lira',
+        
         categories: ['Education'],
         desktopTemplate: './forge.deb.desktop',
         options: {
@@ -129,10 +129,10 @@ module.exports = {
     {
       name: '@electron-forge/maker-rpm',
       config: {
-        name: 'ArbutusLabs',
-        bin: 'ArbutusLabs',
-        maintainer: 'Arbutus Labs (Custom Goose Distribution)',
-        homepage: 'https://arbutuslabs.ca',
+        name: 'Lira',
+        bin: 'Lira',
+        maintainer: 'Lira',
+        
         categories: ['Education'],
         desktopTemplate: './forge.rpm.desktop',
         options: {
@@ -146,15 +146,15 @@ module.exports = {
       name: '@electron-forge/maker-flatpak',
       config: {
         options: {
-          id: 'ai.arbutuslabs.ArbutusLabs',
+          id: 'ai.lira.desktop',
           categories: ['Education'],
           mimeType: ['x-scheme-handler/goose'],
           icon: {
             scalable: 'src/images/icon.svg',
             '512x512': 'src/images/icon-512.png',
           },
-          homepage: 'https://arbutuslabs.ca',
-          bin: 'ArbutusLabs',
+          
+          bin: 'Lira',
           runtimeVersion: '25.08',
           baseVersion: '25.08',
           modules: [

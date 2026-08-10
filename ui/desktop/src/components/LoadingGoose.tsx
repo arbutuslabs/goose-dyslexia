@@ -1,5 +1,5 @@
 import GooseLogo from './GooseLogo';
-import ArbutusStatus from './ArbutusStatus';
+import LiraStatus from './LiraStatus';
 import { ChatState } from '../types/chatState';
 import { defineMessages, useIntl } from '../i18n';
 
@@ -15,23 +15,23 @@ const i18n = defineMessages({
   },
   thinking: {
     id: 'loadingGoose.thinking',
-    defaultMessage: 'arbutus labs is thinking…',
+    defaultMessage: 'Lira is thinking…',
   },
   streaming: {
     id: 'loadingGoose.streaming',
-    defaultMessage: 'arbutus labs is working on it…',
+    defaultMessage: 'Lira is working on it…',
   },
   waiting: {
     id: 'loadingGoose.waiting',
-    defaultMessage: 'arbutus labs is waiting…',
+    defaultMessage: 'Lira is waiting…',
   },
   compacting: {
     id: 'loadingGoose.compacting',
-    defaultMessage: 'arbutus labs is compacting the conversation...',
+    defaultMessage: 'Lira is compacting the conversation...',
   },
   idle: {
     id: 'loadingGoose.idle',
-    defaultMessage: 'arbutus labs is working on it…',
+    defaultMessage: 'Lira is working on it…',
   },
   restartingAgent: {
     id: 'loadingGoose.restartingAgent',
@@ -40,13 +40,13 @@ const i18n = defineMessages({
 });
 
 const STATE_ICONS: Record<ChatState, React.ReactNode> = {
-  [ChatState.LoadingConversation]: <ArbutusStatus className="flex-shrink-0" />,
-  [ChatState.Thinking]: <ArbutusStatus className="flex-shrink-0" />,
-  [ChatState.Streaming]: <ArbutusStatus className="flex-shrink-0" />,
-  [ChatState.WaitingForUserInput]: <ArbutusStatus className="flex-shrink-0" />,
-  [ChatState.Compacting]: <ArbutusStatus className="flex-shrink-0" />,
+  [ChatState.LoadingConversation]: <LiraStatus className="flex-shrink-0" />,
+  [ChatState.Thinking]: <LiraStatus className="flex-shrink-0" />,
+  [ChatState.Streaming]: <LiraStatus className="flex-shrink-0" />,
+  [ChatState.WaitingForUserInput]: <LiraStatus className="flex-shrink-0" />,
+  [ChatState.Compacting]: <LiraStatus className="flex-shrink-0" />,
   [ChatState.Idle]: <GooseLogo size="small" hover={false} />,
-  [ChatState.RestartingAgent]: <ArbutusStatus className="flex-shrink-0" />,
+  [ChatState.RestartingAgent]: <LiraStatus className="flex-shrink-0" />,
 };
 
 const STATE_MESSAGE_KEYS: Record<ChatState, keyof typeof i18n> = {

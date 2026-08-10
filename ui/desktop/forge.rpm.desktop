@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=Arbutus Labs
-Exec=/usr/lib/ArbutusLabs/ArbutusLabs %U
-Icon=/usr/share/pixmaps/ArbutusLabs.png
+Name=Lira
+Exec=/usr/lib/Lira/Lira %U
+Icon=/usr/share/pixmaps/Lira.png
 Terminal=false
 Type=Application
 Categories=Education;

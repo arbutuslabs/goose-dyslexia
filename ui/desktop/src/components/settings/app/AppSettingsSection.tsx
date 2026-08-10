@@ -16,8 +16,7 @@ import UpdateSection from './UpdateSection';
 import { COST_TRACKING_ENABLED, UPDATES_ENABLED } from '../../../updates';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import ThemeSelector from '../../GooseSidebar/ThemeSelector';
-import ArbutusLogoBlack from './icons/arbutuslabs-black.png';
-import ArbutusLogoWhite from './icons/arbutuslabs-white.png';
+import LiraWordmark from '../../../images/lira-wordmark.png';
 import TelemetrySettings from './TelemetrySettings';
 import { trackSettingToggled } from '../../../utils/analytics';
 import type { LanguageSetting } from '../../../utils/settings';
@@ -188,28 +187,11 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showPricing, setShowPricing] = useState(true);
   const [language, setLanguage] = useState<LanguageSetting>('system');
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const updateSectionRef = useRef<HTMLDivElement>(null);
   const shouldShowUpdates = !window.appConfig.get('GOOSE_VERSION');
 
   useEffect(() => {
     setIsMacOS(window.electron.platform === 'darwin');
-  }, []);
-
-  useEffect(() => {
-    const updateTheme = () => {
-      setIsDarkMode(document.documentElement.classList.contains('dark'));
-    };
-
-    updateTheme();
-
-    const observer = new MutationObserver(updateTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-
-    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -545,9 +527,9 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
           <CardContent className="pt-4 px-4">
             <div className="flex items-center gap-3">
               <img
-                src={isDarkMode ? ArbutusLogoWhite : ArbutusLogoBlack}
-                alt="Arbutus Labs Logo"
-                className="h-8 w-auto"
+                src={LiraWordmark}
+                alt="Lira"
+                className="h-8 w-auto dark:invert"
               />
               <span className="text-2xl font-mono text-black dark:text-white">
                 {String(window.appConfig.get('GOOSE_VERSION') || 'Development')}
