@@ -2365,6 +2365,33 @@ ipcMain.handle('list-files', async (_event, dirPath, extension) => {
   }
 });
 
+// Directory listing with entry types, for the file browser tree view.
+// Kept separate from 'list-files' (which returns bare names) so existing
+// callers like the @-mention popover are unaffected.
+ipcMain.handle('list-directory', async (_event, dirPath) => {
+  try {
+    const expandedPath = expandTilde(dirPath);
+    const entries = await fs.readdir(expandedPath, { withFileTypes: true });
+    return entries
+      .filter((entry) => !entry.name.startsWith('.'))
+      .map((entry) => ({
+        name: entry.name,
+        path: path.join(expandedPath, entry.name),
+        isDirectory: entry.isDirectory(),
+      }))
+      .sort((a, b) =>
+        a.isDirectory === b.isDirectory
+          ? a.name.localeCompare(b.name)
+          : a.isDirectory
+            ? -1
+            : 1
+      );
+  } catch (error) {
+    console.error('Error listing directory:', error);
+    return [];
+  }
+});
+
 ipcMain.handle('show-message-box', async (_event, options) => {
   return dialog.showMessageBox(options);
 });

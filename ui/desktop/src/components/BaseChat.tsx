@@ -412,8 +412,9 @@ export default function BaseChat({
 
         {/* Chat container with sticky recipe header */}
         <div className="flex flex-col flex-1 min-h-0 relative">
-          {/* Arbutus Labs watermark - top right */}
-          <div className="absolute top-[14px] right-4 z-[60] flex flex-row items-center gap-1">
+          {/* Arbutus Labs watermark - top right, inset to clear the floating
+              files-panel opener that occupies the corner when the panel is closed */}
+          <div className="absolute top-[14px] right-14 z-[60] flex flex-row items-center gap-1">
             <a
               href="https://arbutuslabs.ca"
               target="_blank"

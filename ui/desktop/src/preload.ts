@@ -79,6 +79,12 @@ interface FileResponse {
   found: boolean;
 }
 
+export interface DirectoryEntry {
+  name: string;
+  path: string;
+  isDirectory: boolean;
+}
+
 const config = JSON.parse(process.argv.find((arg) => arg.startsWith('{')) || '{}');
 
 interface UpdaterEvent {
@@ -122,6 +128,7 @@ type ElectronAPI = {
   writeFile: (directory: string, content: string) => Promise<boolean>;
   ensureDirectory: (dirPath: string) => Promise<boolean>;
   listFiles: (dirPath: string, extension?: string) => Promise<string[]>;
+  listDirectory: (dirPath: string) => Promise<DirectoryEntry[]>;
   getAllowedExtensions: () => Promise<string[]>;
   getPathForFile: (file: File) => string;
   setMenuBarIcon: (show: boolean) => Promise<boolean>;
@@ -219,6 +226,7 @@ const electronAPI: ElectronAPI = {
   ensureDirectory: (dirPath: string) => ipcRenderer.invoke('ensure-directory', dirPath),
   listFiles: (dirPath: string, extension?: string) =>
     ipcRenderer.invoke('list-files', dirPath, extension),
+  listDirectory: (dirPath: string) => ipcRenderer.invoke('list-directory', dirPath),
   getPathForFile: (file: File) => webUtils.getPathForFile(file),
   getAllowedExtensions: () => ipcRenderer.invoke('get-allowed-extensions'),
   setMenuBarIcon: (show: boolean) => ipcRenderer.invoke('set-menu-bar-icon', show),
