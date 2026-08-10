@@ -296,8 +296,8 @@ importers:
         specifier: ^10.4.24
         version: 10.5.4(postcss@8.5.26)
       electron:
-        specifier: 41.10.3
-        version: 41.10.3
+        specifier: 43.3.0
+        version: 43.3.0
       electron-devtools-installer:
         specifier: ^4.0.0
         version: 4.0.0
@@ -714,7 +714,7 @@ packages:
     engines: {node: '>=22.12.0'}
 
   '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2':
-    resolution: {tarball: https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2}
+    resolution: {gitHosted: true, tarball: https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2}
     version: 10.2.0-electron.1
     engines: {node: '>=12.13.0'}
     hasBin: true
@@ -3651,8 +3651,8 @@ packages:
     resolution: {integrity: sha512-j9ETcBGJaXxAY/b6UBpR7LZfjdU4BAO+yvr4ifqHEdyuc3UNCy91PDGkWKY5UQ4coHNYfnwFggrqD6QPeFGAlg==}
     engines: {node: '>=8.0.0'}
 
-  electron@41.10.3:
-    resolution: {integrity: sha512-MJuSODPw8siv/I8JjhctW/cS/XNldwI4gLRyyWZx6QkoZJUDgbEvitp7IVOnGrHENTQb6Udo+zMpKhFnhlIhdg==}
+  electron@43.3.0:
+    resolution: {integrity: sha512-nLlvu0WFjftWsSaTkV2B/c4NDuJBspTyXu8vKSQ6vLvFt8uG3NgN49LLKcXddwX0GqVvAQDhciWp+4xOdTdhew==}
     engines: {node: '>= 22.12.0'}
     hasBin: true
 
@@ -10515,7 +10515,7 @@ snapshots:
       - supports-color
     optional: true
 
-  electron@41.10.3:
+  electron@43.3.0:
     dependencies:
       '@electron-internal/extract-zip': 1.0.5
       '@electron/get': 5.1.0
