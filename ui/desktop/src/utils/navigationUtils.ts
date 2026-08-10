@@ -13,10 +13,7 @@ export type View =
   | 'ConfigureProviders'
   | 'settingsV2'
   | 'sessions'
-  | 'schedules'
   | 'loading'
-  | 'recipes'
-  | 'skills'
   | 'permission';
 
 export type ViewOptions = {
@@ -56,15 +53,6 @@ export const createNavigationHandler = (navigate: NavigateFunction) => {
         break;
       case 'sessions':
         navigate('/sessions', { state: options });
-        break;
-      case 'schedules':
-        navigate('/schedules', { state: options });
-        break;
-      case 'recipes':
-        navigate('/recipes', { state: options });
-        break;
-      case 'skills':
-        navigate('/skills', { state: options });
         break;
       case 'permission':
         navigate('/permission', { state: options });

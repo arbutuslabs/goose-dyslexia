@@ -1,8 +1,8 @@
 {
   "name": "goose-app",
-  "productName": "Goose",
+  "productName": "Arbutus Labs",
   "version": "1.45.0",
-  "description": "Goose App",
+  "description": "AI assistant for dyslexia lesson planning",
   "engines": {
     "node": "^24.10.0",
     "pnpm": ">=10.30.0"

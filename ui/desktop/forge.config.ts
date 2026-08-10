@@ -7,6 +7,8 @@ const isLinuxVulkanBuild = process.env.GOOSE_DESKTOP_LINUX_VARIANT === 'vulkan';
 let cfg = {
   asar: true,
   extraResource: ['src/bin', 'src/images', 'src/app-update.yml'],
+  name: 'ArbutusLabs',
+  executableName: 'ArbutusLabs',
   icon: 'src/images/icon',
   // Windows specific configuration
   win32: {
@@ -19,12 +21,14 @@ let cfg = {
   // Protocol registration
   protocols: [
     {
-      name: 'GooseProtocol',
+      name: 'ArbutusLabsProtocol',
       schemes: ['goose'],
     },
   ],
   // macOS Info.plist extensions for drag-and-drop support
   extendInfo: {
+    // Display name shown in the Dock and app switcher
+    CFBundleDisplayName: 'Arbutus Labs',
     // Document types for drag-and-drop support onto dock icon
     CFBundleDocumentTypes: [
       {
@@ -36,9 +40,9 @@ let cfg = {
     ],
     // Usage descriptions for macOS TCC (Transparency, Consent, and Control)
     NSMicrophoneUsageDescription:
-      'Goose needs access to your microphone for voice dictation.',
+      'Arbutus Labs needs access to your microphone for voice dictation.',
     NSAppleEventsUsageDescription:
-      'Goose needs access to send Apple Events to control other apps on your behalf.',
+      'Arbutus Labs needs access to send Apple Events to control other apps on your behalf.',
   },
 };
 
@@ -60,6 +64,28 @@ if (process.env.APPLE_TEAM_ID) {
 module.exports = {
   packagerConfig: cfg,
   rebuildConfig: {},
+  hooks: {
+    postPackage: async (_forgeConfig, options) => {
+      const fs = require('fs');
+      const path = require('path');
+      if (options.platform === 'darwin' && options.outputPaths && options.outputPaths[0]) {
+        const appName = cfg.name;
+        const plistPath = path.join(options.outputPaths[0], `${appName}.app`, 'Contents', 'Info.plist');
+        if (fs.existsSync(plistPath)) {
+          let plist = fs.readFileSync(plistPath, 'utf8');
+          const before = plist;
+          plist = plist.replace(
+            '<key>CFBundleDisplayName</key>\n    <string>ArbutusLabs</string>',
+            '<key>CFBundleDisplayName</key>\n    <string>Arbutus Labs</string>'
+          );
+          if (plist !== before) {
+            fs.writeFileSync(plistPath, plist);
+            console.log(`Updated ${plistPath} CFBundleDisplayName to 'Arbutus Labs'`);
+          }
+        }
+      }
+    },
+  },
   publishers: [
     {
       name: '@electron-forge/publisher-github',
@@ -87,11 +113,11 @@ module.exports = {
     {
       name: '@electron-forge/maker-deb',
       config: {
-        name: 'Goose',
-        bin: 'Goose',
-        maintainer: 'AAIF (Agentic AI Foundation)',
-        homepage: 'https://goose-docs.ai/',
-        categories: ['Development'],
+        name: 'ArbutusLabs',
+        bin: 'ArbutusLabs',
+        maintainer: 'Arbutus Labs (Custom Goose Distribution)',
+        homepage: 'https://arbutuslabs.ca',
+        categories: ['Education'],
         desktopTemplate: './forge.deb.desktop',
         options: {
           icon: 'src/images/icon.png',
@@ -103,11 +129,11 @@ module.exports = {
     {
       name: '@electron-forge/maker-rpm',
       config: {
-        name: 'Goose',
-        bin: 'Goose',
-        maintainer: 'AAIF (Agentic AI Foundation)',
-        homepage: 'https://goose-docs.ai/',
-        categories: ['Development'],
+        name: 'ArbutusLabs',
+        bin: 'ArbutusLabs',
+        maintainer: 'Arbutus Labs (Custom Goose Distribution)',
+        homepage: 'https://arbutuslabs.ca',
+        categories: ['Education'],
         desktopTemplate: './forge.rpm.desktop',
         options: {
           icon: 'src/images/icon.png',
@@ -120,17 +146,17 @@ module.exports = {
       name: '@electron-forge/maker-flatpak',
       config: {
         options: {
-          id: 'io.github.block.Goose', // NOTE: kept for backwards compat with existing installs
-          categories: ['Development'],
+          id: 'ai.arbutuslabs.ArbutusLabs',
+          categories: ['Education'],
           mimeType: ['x-scheme-handler/goose'],
           icon: {
             scalable: 'src/images/icon.svg',
             '512x512': 'src/images/icon-512.png',
           },
-          homepage: 'https://goose-docs.ai/',
+          homepage: 'https://arbutuslabs.ca',
+          bin: 'ArbutusLabs',
           runtimeVersion: '25.08',
           baseVersion: '25.08',
-          bin: 'Goose',
           modules: [
             {
               name: 'libbz2-shim',

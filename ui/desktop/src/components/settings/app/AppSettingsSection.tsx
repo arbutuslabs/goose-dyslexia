@@ -16,8 +16,8 @@ import UpdateSection from './UpdateSection';
 import { COST_TRACKING_ENABLED, UPDATES_ENABLED } from '../../../updates';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import ThemeSelector from '../../GooseSidebar/ThemeSelector';
-import BlockLogoBlack from './icons/block-lockup_black.png';
-import BlockLogoWhite from './icons/block-lockup_white.png';
+import ArbutusLogoBlack from './icons/arbutuslabs-black.png';
+import ArbutusLogoWhite from './icons/arbutuslabs-white.png';
 import TelemetrySettings from './TelemetrySettings';
 import { trackSettingToggled } from '../../../utils/analytics';
 import type { LanguageSetting } from '../../../utils/settings';
@@ -545,8 +545,8 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
           <CardContent className="pt-4 px-4">
             <div className="flex items-center gap-3">
               <img
-                src={isDarkMode ? BlockLogoWhite : BlockLogoBlack}
-                alt="Block Logo" // TODO: replace with AAIF logo asset
+                src={isDarkMode ? ArbutusLogoWhite : ArbutusLogoBlack}
+                alt="Arbutus Labs Logo"
                 className="h-8 w-auto"
               />
               <span className="text-2xl font-mono text-black dark:text-white">

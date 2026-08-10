@@ -31,7 +31,6 @@ interface PairRouteState {
 }
 import SettingsView, { SettingsViewOptions } from './components/settings/SettingsView';
 import SessionsView from './components/sessions/SessionsView';
-import SchedulesView from './components/schedule/SchedulesView';
 import ProviderSettings from './components/settings/providers/ProviderSettingsPage';
 import { AppLayout } from './components/Layout/AppLayout';
 import { ChatProvider, DEFAULT_CHAT_TITLE } from './contexts/ChatContext';
@@ -45,8 +44,7 @@ import { FeaturesProvider } from './contexts/FeaturesContext';
 import PermissionSettingsView from './components/settings/permission/PermissionSetting';
 
 import ExtensionsView, { ExtensionsViewOptions } from './components/extensions/ExtensionsView';
-import RecipesView from './components/recipes/RecipesView';
-import SkillsView from './components/skills/SkillsView';
+
 import AppsView from './components/apps/AppsView';
 import StandaloneAppView from './components/apps/StandaloneAppView';
 import { View, ViewOptions } from './utils/navigationUtils';
@@ -206,19 +204,6 @@ const SessionsRoute = () => {
   return <SessionsView />;
 };
 
-const SchedulesRoute = () => {
-  const navigate = useNavigate();
-  return <SchedulesView onClose={() => navigate('/')} />;
-};
-
-const RecipesRoute = () => {
-  return <RecipesView />;
-};
-
-const SkillsRoute = () => {
-  return <SkillsView />;
-};
-
 const PermissionRoute = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -241,15 +226,6 @@ const PermissionRoute = () => {
             break;
           case 'sessions':
             navigate('/sessions');
-            break;
-          case 'schedules':
-            navigate('/schedules');
-            break;
-          case 'recipes':
-            navigate('/recipes');
-            break;
-          case 'skills':
-            navigate('/skills');
             break;
           default:
             navigate('/');
@@ -664,9 +640,7 @@ export function AppInner() {
               />
               <Route path="apps" element={<AppsView />} />
               <Route path="sessions" element={<SessionsRoute />} />
-              <Route path="schedules" element={<SchedulesRoute />} />
-              <Route path="recipes" element={<RecipesRoute />} />
-              <Route path="skills" element={<SkillsRoute />} />
+
               <Route path="permission" element={<PermissionRoute />} />
             </Route>
           </Routes>

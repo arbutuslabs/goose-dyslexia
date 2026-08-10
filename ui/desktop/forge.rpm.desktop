@@ -1,8 +1,8 @@
 [Desktop Entry]
-Name=Goose
-Exec=/usr/lib/Goose/Goose %U
-Icon=/usr/share/pixmaps/Goose.png
+Name=Arbutus Labs
+Exec=/usr/lib/ArbutusLabs/ArbutusLabs %U
+Icon=/usr/share/pixmaps/ArbutusLabs.png
 Terminal=false
 Type=Application
-Categories=Development;
+Categories=Education;
 MimeType=x-scheme-handler/goose;
