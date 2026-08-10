@@ -1,6 +1,5 @@
 import GooseLogo from './GooseLogo';
-import AnimatedIcons from './AnimatedIcons';
-import FlyingBird from './FlyingBird';
+import ArbutusStatus from './ArbutusStatus';
 import { ChatState } from '../types/chatState';
 import { defineMessages, useIntl } from '../i18n';
 
@@ -41,15 +40,13 @@ const i18n = defineMessages({
 });
 
 const STATE_ICONS: Record<ChatState, React.ReactNode> = {
-  [ChatState.LoadingConversation]: <AnimatedIcons className="flex-shrink-0" cycleInterval={600} />,
-  [ChatState.Thinking]: <AnimatedIcons className="flex-shrink-0" cycleInterval={600} />,
-  [ChatState.Streaming]: <FlyingBird className="flex-shrink-0" cycleInterval={150} />,
-  [ChatState.WaitingForUserInput]: (
-    <AnimatedIcons className="flex-shrink-0" cycleInterval={600} variant="waiting" />
-  ),
-  [ChatState.Compacting]: <AnimatedIcons className="flex-shrink-0" cycleInterval={600} />,
+  [ChatState.LoadingConversation]: <ArbutusStatus className="flex-shrink-0" />,
+  [ChatState.Thinking]: <ArbutusStatus className="flex-shrink-0" />,
+  [ChatState.Streaming]: <ArbutusStatus className="flex-shrink-0" />,
+  [ChatState.WaitingForUserInput]: <ArbutusStatus className="flex-shrink-0" />,
+  [ChatState.Compacting]: <ArbutusStatus className="flex-shrink-0" />,
   [ChatState.Idle]: <GooseLogo size="small" hover={false} />,
-  [ChatState.RestartingAgent]: <AnimatedIcons className="flex-shrink-0" cycleInterval={600} />,
+  [ChatState.RestartingAgent]: <ArbutusStatus className="flex-shrink-0" />,
 };
 
 const STATE_MESSAGE_KEYS: Record<ChatState, keyof typeof i18n> = {
