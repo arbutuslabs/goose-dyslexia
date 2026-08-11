@@ -24,6 +24,7 @@ import MessageCopyLink from './MessageCopyLink';
 import MessageUsageStats from './MessageUsageStats';
 import { cn } from '../utils';
 import { identifyConsecutiveToolCalls, shouldHideTimestamp } from '../utils/toolCallChaining';
+import { useShowToolCalls } from '../hooks/useShowToolCalls';
 
 interface GooseMessageProps {
   sessionId: string;
@@ -49,6 +50,9 @@ export default function GooseMessage({
   submitElicitationResponse,
 }: GooseMessageProps) {
   const contentRef = useRef<HTMLDivElement | null>(null);
+  // Governs both tool calls and the model's thinking blocks: they're the same
+  // kind of noise for a tutor, so one switch controls both.
+  const showToolCalls = useShowToolCalls();
 
   const outputTokenLimitReached = message.metadata.outputTokenLimitReached === true;
   const isOutputTokenLimitFallback =
@@ -56,7 +60,8 @@ export default function GooseMessage({
   const { textContent, imagePaths: allImagePaths } = getTextAndImageContent(message);
   const displayText = isOutputTokenLimitFallback ? '' : textContent;
   const imagePaths = isOutputTokenLimitFallback ? [] : allImagePaths;
-  const thinkingContent = isOutputTokenLimitFallback ? null : getThinkingContent(message);
+  const thinkingContent =
+    isOutputTokenLimitFallback || !showToolCalls ? null : getThinkingContent(message);
 
   const timestamp = useMemo(() => formatMessageTimestamp(message.created), [message.created]);
   const toolRequests = getToolRequests(message);
@@ -128,6 +133,34 @@ export default function GooseMessage({
 
   const pendingConfirmationIds = getPendingToolConfirmationIds(messages);
 
+  // Tool calls are hidden by default so the conversation reads cleanly, but two
+  // kinds always show: ones awaiting approval (hiding them would strand the
+  // session on a button nobody can see) and ones that failed (a silent failure
+  // reads as success). Streaming calls stay hidden — their outcome isn't known
+  // yet, and popping in mid-stream would be noisier than staying quiet.
+  const visibleToolRequests = useMemo(() => {
+    if (showToolCalls) return toolRequests;
+    return toolRequests.filter((toolRequest) => {
+      if (pendingConfirmationIds.has(toolRequest.id)) return true;
+      const response = toolResponsesMap.get(toolRequest.id);
+      const result = response?.toolResult as Record<string, unknown> | undefined;
+      return result?.status === 'error';
+    });
+  }, [showToolCalls, toolRequests, pendingConfirmationIds, toolResponsesMap]);
+
+  // With tool calls hidden, a message that was only tool calls has nothing left
+  // to render — skip it entirely rather than leaving an empty bubble and a gap.
+  const hasVisibleContent =
+    Boolean(thinkingContent) ||
+    displayText.trim().length > 0 ||
+    imagePaths.length > 0 ||
+    visibleToolRequests.length > 0 ||
+    outputTokenLimitReached ||
+    (hasToolConfirmation && !toolConfirmationShownInline) ||
+    hasElicitation;
+
+  if (!hasVisibleContent) return null;
+
   return (
     <div className="goose-message flex w-[90%] justify-start min-w-0">
       <div className="flex flex-col w-full min-w-0">
@@ -181,11 +214,11 @@ export default function GooseMessage({
           </div>
         )}
 
-        {toolRequests.length > 0 && (
+        {visibleToolRequests.length > 0 && (
           <div className={cn(displayText && 'mt-2')}>
             <div className="relative flex flex-col w-full group">
               <div className="flex flex-col gap-3">
-                {toolRequests.map((toolRequest) => {
+                {visibleToolRequests.map((toolRequest) => {
                   const hasResponse = toolResponsesMap.has(toolRequest.id);
                   const isPending = pendingConfirmationIds.has(toolRequest.id);
                   const confirmationContent = findConfirmationForToolAcrossMessages(toolRequest.id);

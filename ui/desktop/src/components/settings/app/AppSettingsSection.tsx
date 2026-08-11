@@ -17,6 +17,7 @@ import { COST_TRACKING_ENABLED, UPDATES_ENABLED } from '../../../updates';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import ThemeSelector from '../../GooseSidebar/ThemeSelector';
 import LiraWordmark from '../../../images/lira-wordmark.png';
+import { SHOW_TOOL_CALLS_CHANGED } from '../../../hooks/useShowToolCalls';
 import TelemetrySettings from './TelemetrySettings';
 import { trackSettingToggled } from '../../../utils/analytics';
 import type { LanguageSetting } from '../../../utils/settings';
@@ -59,6 +60,12 @@ const i18n = defineMessages({
   costTrackingDesc: {
     id: 'settings.costTracking.description',
     defaultMessage: 'Show model pricing and usage costs',
+  },
+  showToolCalls: { id: 'settings.showToolCalls.title', defaultMessage: "Show Lira's Working" },
+  showToolCallsDesc: {
+    id: 'settings.showToolCalls.description',
+    defaultMessage:
+      'Show the steps and reasoning behind each reply. Failed steps and permission requests always appear.',
   },
   themeTitle: { id: 'settings.theme.title', defaultMessage: 'Theme' },
   themeDesc: {
@@ -186,6 +193,7 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
   const [isDockSwitchDisabled, setIsDockSwitchDisabled] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showPricing, setShowPricing] = useState(true);
+  const [showToolCalls, setShowToolCalls] = useState(false);
   const [language, setLanguage] = useState<LanguageSetting>('system');
   const updateSectionRef = useRef<HTMLDivElement>(null);
   const shouldShowUpdates = !window.appConfig.get('GOOSE_VERSION');
@@ -196,6 +204,7 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
 
   useEffect(() => {
     window.electron.getSetting('showPricing').then(setShowPricing);
+    window.electron.getSetting('showToolCalls').then((value) => setShowToolCalls(Boolean(value)));
     window.electron.getSetting('language').then((value) => setLanguage(value ?? 'system'));
   }, []);
 
@@ -290,6 +299,14 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
     trackSettingToggled('cost_tracking', checked);
     // Trigger event for other components
     window.dispatchEvent(new CustomEvent('showPricingChanged'));
+  };
+
+  const handleShowToolCallsToggle = async (checked: boolean) => {
+    setShowToolCalls(checked);
+    await window.electron.setSetting('showToolCalls', checked);
+    trackSettingToggled('show_tool_calls', checked);
+    // Let open conversations pick up the change without a reload.
+    window.dispatchEvent(new CustomEvent(SHOW_TOOL_CALLS_CHANGED));
   };
 
   const handleLanguageChange = async (value: string) => {
@@ -422,6 +439,23 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
               <Switch
                 checked={wakelockEnabled}
                 onCheckedChange={handleWakelockToggle}
+                variant="mono"
+              />
+            </div>
+          </div>
+
+          {/* Show Tool Calls */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-text-primary">{intl.formatMessage(i18n.showToolCalls)}</h3>
+              <p className="text-xs text-text-secondary max-w-md mt-[2px]">
+                {intl.formatMessage(i18n.showToolCallsDesc)}
+              </p>
+            </div>
+            <div className="flex items-center">
+              <Switch
+                checked={showToolCalls}
+                onCheckedChange={handleShowToolCallsToggle}
                 variant="mono"
               />
             </div>

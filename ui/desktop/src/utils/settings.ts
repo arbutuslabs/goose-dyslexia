@@ -47,6 +47,7 @@ export interface Settings {
   language: LanguageSetting;
   responseStyle: string;
   showPricing: boolean;
+  showToolCalls: boolean;
   seenAnnouncementIds: string[];
 }
 
@@ -87,6 +88,9 @@ export const defaultSettings: Settings = {
   language: 'system',
   responseStyle: 'concise',
   showPricing: true,
+  // Hidden by default: tutors don't need the mechanics, only the conversation.
+  // Errors and approval prompts show regardless of this setting.
+  showToolCalls: false,
   seenAnnouncementIds: [],
 };
 
