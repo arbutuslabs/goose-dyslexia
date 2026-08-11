@@ -10,6 +10,9 @@ let cfg = {
   name: 'Lira',
   executableName: 'Lira',
   icon: 'src/images/icon',
+  // macOS/Windows bundle identity. macOS keys its icon cache off this, so it
+  // must be set here — the appImage maker's `id` is Linux-only.
+  appBundleId: 'ai.lira.desktop',
   // Windows specific configuration
   win32: {
     icon: 'src/images/icon.ico',
