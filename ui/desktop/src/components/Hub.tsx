@@ -20,6 +20,7 @@ import {
   type StudentEntry,
 } from './hub/tutorWorkspace';
 import { AppEvents } from '../constants/events';
+import LiraLogo from '../images/lira-logo.png';
 import { ChatState } from '../types/chatState';
 import 'react-toastify/dist/ReactToastify.css';
 import { View, ViewOptions } from '../utils/navigationUtils';
@@ -182,13 +183,25 @@ export default function Hub({
   return (
     <div className="flex flex-col h-full min-h-0 items-center justify-center px-6 relative">
       <div className="w-full max-w-2xl">
-        <div className="flex items-baseline gap-2 mb-1">
-          <span className="text-6xl font-light text-text-primary tracking-tight tabular-nums">
-            {time}
-          </span>
-          <span className="text-2xl font-light text-text-secondary">{meridiem}</span>
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <div className="flex items-baseline gap-2 mb-1">
+              <span className="text-6xl font-light text-text-primary tracking-tight tabular-nums">
+                {time}
+              </span>
+              <span className="text-2xl font-light text-text-secondary">{meridiem}</span>
+            </div>
+            <p className="text-xl text-text-secondary">{greeting}</p>
+          </div>
+          {/* Artwork is white-on-transparent, made for dark backgrounds, so
+              invert it in light mode and leave it alone in dark. */}
+          <img
+            src={LiraLogo}
+            alt="Lira"
+            draggable={false}
+            className="h-10 w-auto flex-shrink-0 select-none opacity-90 invert dark:invert-0"
+          />
         </div>
-        <p className="text-xl text-text-secondary mb-6">{greeting}</p>
 
         {workspace.status === 'error' && (
           <p className="mb-6 text-sm text-text-muted">{workspace.message}</p>
