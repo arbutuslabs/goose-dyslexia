@@ -1,10 +1,4 @@
-import {
-  AppWindow,
-  GraduationCap,
-  History,
-  Puzzle,
-  Settings,
-} from 'lucide-react';
+import { AppWindow, GraduationCap, Settings } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { defineMessages, type IntlShape, type MessageDescriptor } from 'react-intl';
 
@@ -21,8 +15,6 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { id: 'home', path: '/', label: 'Students', icon: GraduationCap },
   { id: 'apps', path: '/apps', label: 'Apps', icon: AppWindow },
-  { id: 'extensions', path: '/extensions', label: 'Extensions', icon: Puzzle },
-  { id: 'sessions', path: '/sessions', label: 'Session History', icon: History },
 ];
 
 /** Settings is rendered separately, pinned to the bottom of the sidebar. */
@@ -43,14 +35,6 @@ const navItemMessages = defineMessages({
   apps: {
     id: 'navigation.itemApps',
     defaultMessage: 'Apps',
-  },
-  extensions: {
-    id: 'navigation.itemExtensions',
-    defaultMessage: 'Extensions',
-  },
-  sessions: {
-    id: 'navigation.itemSessions',
-    defaultMessage: 'Session History',
   },
   settings: {
     id: 'navigation.itemSettings',

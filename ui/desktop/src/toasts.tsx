@@ -84,6 +84,15 @@ class ToastService {
 
     const toastId = 'extension-loading';
     const hasErrors = extensions.some((ext) => ext.status === 'error');
+
+    // Extensions loading successfully is plumbing, not news — tutors shouldn't
+    // see a count on every launch. Failures still surface, since a missing
+    // extension breaks features and needs to be visible.
+    if (!hasErrors) {
+      if (toast.isActive(toastId)) toast.dismiss(toastId);
+      return toastId;
+    }
+
     const autoClose = isComplete && !hasErrors ? 5000 : false;
 
     // Check if toast already exists

@@ -11,7 +11,6 @@ import debounce from 'lodash/debounce';
 import { LocalMessageStorage } from '../utils/localMessageStorage';
 import { DirSwitcher } from './bottom_menu/DirSwitcher';
 import ModelsBottomBar from './settings/models/bottom_bar/ModelsBottomBar';
-import { BottomMenuExtensionSelection } from './bottom_menu/BottomMenuExtensionSelection';
 import { cn } from '../utils';
 import { AlertType, useAlerts } from './alerts';
 import { useModelAndProvider } from './ModelAndProviderContext';
@@ -37,7 +36,6 @@ import { compressImageDataUrl } from '../utils/conversionUtils';
 import { fetchCanonicalModelInfo } from '../utils/canonical';
 import { defineMessages, useIntl } from '../i18n';
 import TurndownService from 'turndown';
-import type { NextChatExtensionDraft } from '../utils/nextChatExtensions';
 
 const turndown = new TurndownService({
   headingStyle: 'atx',
@@ -187,8 +185,6 @@ interface ChatInputProps {
   sessionLoaded?: boolean;
   workingDir?: string | null;
   latestInference?: Message['metadata']['inference'] | null;
-  nextChatExtensionDraft?: NextChatExtensionDraft;
-  onNextChatExtensionDraftChange?: (draft: NextChatExtensionDraft) => void;
 }
 
 export default function ChatInput({
@@ -222,8 +218,6 @@ export default function ChatInput({
   sessionLoaded,
   workingDir,
   latestInference,
-  nextChatExtensionDraft,
-  onNextChatExtensionDraftChange,
 }: ChatInputProps) {
   const [_value, setValue] = useState(initialValue);
   const [displayValue, setDisplayValue] = useState(initialValue); // For immediate visual feedback
@@ -1702,13 +1696,6 @@ export default function ChatInput({
               totalTokens={totalTokens || 0}
               tokenLimit={tokenLimit}
               alerts={alerts}
-            />
-
-            {/* Right: extension selector */}
-            <BottomMenuExtensionSelection
-              sessionId={sessionId}
-              nextChatExtensionDraft={nextChatExtensionDraft}
-              onNextChatExtensionDraftChange={onNextChatExtensionDraftChange}
             />
 
             {/* Right: diagnostics */}
