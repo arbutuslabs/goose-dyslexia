@@ -5,4 +5,4 @@ Icon=/usr/share/pixmaps/Lira.png
 Terminal=false
 Type=Application
 Categories=Education;
-MimeType=x-scheme-handler/goose;
+MimeType=x-scheme-handler/lira;

@@ -397,7 +397,7 @@ export function AppInner() {
       const link = args[0] as string;
       window.electron.logInfo('Opening session share link');
 
-      if (!link.startsWith('goose://sessions/nostr')) {
+      if (!link.startsWith('lira://sessions/nostr')) {
         toast.error('Unsupported session share link');
         navigate('/sessions');
         return;

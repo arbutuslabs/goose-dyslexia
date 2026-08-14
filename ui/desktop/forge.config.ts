@@ -25,7 +25,7 @@ let cfg = {
   protocols: [
     {
       name: 'LiraProtocol',
-      schemes: ['goose'],
+      schemes: ['lira'],
     },
   ],
   // macOS Info.plist extensions for drag-and-drop support
@@ -151,7 +151,7 @@ module.exports = {
         options: {
           id: 'ai.lira.desktop',
           categories: ['Education'],
-          mimeType: ['x-scheme-handler/goose'],
+          mimeType: ['x-scheme-handler/lira'],
           icon: {
             scalable: 'src/images/icon.svg',
             '512x512': 'src/images/icon-512.png',
