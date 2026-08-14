@@ -31,7 +31,7 @@ import {
 } from '../types/message';
 import { substituteParameters } from '../utils/parameterSubstitution';
 import { useAutoSubmit } from '../hooks/useAutoSubmit';
-import { Goose } from './icons';
+import LiraLogo from '../images/lira-logo.png';
 import EnvironmentBadge from './GooseSidebar/EnvironmentBadge';
 import SessionActionsHeader from './SessionActionsHeader';
 import { isAcpRecovering, subscribeToAcpRecovery } from '../acp/acpConnection';
@@ -415,12 +415,14 @@ export default function BaseChat({
           {/* Lira watermark - top right, inset to clear the floating
               files-panel opener that occupies the corner when the panel is closed */}
           <div className="absolute top-[14px] right-14 z-[60] flex flex-row items-center gap-1">
-            <div className="flex flex-row items-center gap-1">
-              <Goose className="size-5 goose-icon-animation" />
-              <span className="text-sm leading-none text-text-secondary -translate-y-px">
-                Lira
-              </span>
-            </div>
+            {/* Full wordmark, so no text label beside it. The artwork is white
+                line art for dark backgrounds, so it inverts in light mode. */}
+            <img
+              src={LiraLogo}
+              alt="Lira"
+              draggable={false}
+              className="goose-icon-animation h-5 w-auto select-none opacity-80 invert dark:invert-0"
+            />
             <EnvironmentBadge className="translate-y-px" />
           </div>
 

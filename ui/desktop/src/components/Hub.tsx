@@ -213,11 +213,12 @@ export default function Hub({
             className="mb-6 w-full rounded-xl border border-border-primary p-5 text-left transition-colors hover:bg-background-tertiary/60"
           >
             <div className="mb-1 text-base font-medium text-text-primary">
-              Set up your tutoring workspace
+              Set up your workspace
             </div>
             <div className="text-sm text-text-muted">
-              Creates a folder on your desktop where each student gets their own binder:
-              profile, session log, and materials.
+              Creates a folder called &quot;Lira Tutor&quot; on your desktop. Each student gets a
+              folder inside it with their profile, the sounds and sight words they know, and
+              every lesson plan you make.
             </div>
           </button>
         )}
