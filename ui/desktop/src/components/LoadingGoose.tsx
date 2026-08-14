@@ -1,7 +1,8 @@
 import GooseLogo from './GooseLogo';
-import LiraStatus from './LiraStatus';
+import LiraLoader from './LiraLoader';
 import { ChatState } from '../types/chatState';
 import { defineMessages, useIntl } from '../i18n';
+import { cn } from '../utils';
 
 interface LoadingGooseProps {
   message?: string;
@@ -15,23 +16,23 @@ const i18n = defineMessages({
   },
   thinking: {
     id: 'loadingGoose.thinking',
-    defaultMessage: 'Lira is thinking…',
+    defaultMessage: 'is thinking…',
   },
   streaming: {
     id: 'loadingGoose.streaming',
-    defaultMessage: 'Lira is working on it…',
+    defaultMessage: 'is working on it…',
   },
   waiting: {
     id: 'loadingGoose.waiting',
-    defaultMessage: 'Lira is waiting…',
+    defaultMessage: 'is waiting…',
   },
   compacting: {
     id: 'loadingGoose.compacting',
-    defaultMessage: 'Lira is compacting the conversation...',
+    defaultMessage: 'is compacting the conversation...',
   },
   idle: {
     id: 'loadingGoose.idle',
-    defaultMessage: 'Lira is working on it…',
+    defaultMessage: 'is working on it…',
   },
   restartingAgent: {
     id: 'loadingGoose.restartingAgent',
@@ -39,14 +40,17 @@ const i18n = defineMessages({
   },
 });
 
+// The wordmark loader is the busy indicator for every working state. Idle
+// keeps the small static logo — a drawing animation with nothing happening
+// behind it would be a lie.
 const STATE_ICONS: Record<ChatState, React.ReactNode> = {
-  [ChatState.LoadingConversation]: <LiraStatus className="flex-shrink-0" />,
-  [ChatState.Thinking]: <LiraStatus className="flex-shrink-0" />,
-  [ChatState.Streaming]: <LiraStatus className="flex-shrink-0" />,
-  [ChatState.WaitingForUserInput]: <LiraStatus className="flex-shrink-0" />,
-  [ChatState.Compacting]: <LiraStatus className="flex-shrink-0" />,
+  [ChatState.LoadingConversation]: <LiraLoader />,
+  [ChatState.Thinking]: <LiraLoader />,
+  [ChatState.Streaming]: <LiraLoader />,
+  [ChatState.WaitingForUserInput]: <LiraLoader />,
+  [ChatState.Compacting]: <LiraLoader />,
   [ChatState.Idle]: <GooseLogo size="small" hover={false} />,
-  [ChatState.RestartingAgent]: <LiraStatus className="flex-shrink-0" />,
+  [ChatState.RestartingAgent]: <LiraLoader />,
 };
 
 const STATE_MESSAGE_KEYS: Record<ChatState, keyof typeof i18n> = {
@@ -63,12 +67,18 @@ const LoadingGoose = ({ message, chatState = ChatState.Idle }: LoadingGooseProps
   const intl = useIntl();
   const displayMessage = message || intl.formatMessage(i18n[STATE_MESSAGE_KEYS[chatState]]);
   const icon = STATE_ICONS[chatState];
+  const isIdle = chatState === ChatState.Idle;
 
   return (
     <div className="w-full animate-fade-slide-up">
       <div
         data-testid="loading-indicator"
-        className="flex items-center gap-2 text-xs text-text-primary py-2"
+        className={cn(
+          'py-2 text-xs text-text-primary',
+          // The loader is a ~60px-tall wordmark, so it stacks above the label
+          // rather than sitting beside it. Idle's small logo stays inline.
+          isIdle ? 'flex items-center gap-2' : 'flex flex-col items-start gap-1'
+        )}
       >
         {icon}
         {displayMessage}

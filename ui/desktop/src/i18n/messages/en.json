@@ -1701,10 +1701,10 @@
     "defaultMessage": "Ask goose anything..."
   },
   "loadingGoose.compacting": {
-    "defaultMessage": "Lira is compacting the conversation..."
+    "defaultMessage": "is compacting the conversation..."
   },
   "loadingGoose.idle": {
-    "defaultMessage": "Lira is working on it…"
+    "defaultMessage": "is working on it…"
   },
   "loadingGoose.loadingConversation": {
     "defaultMessage": "loading conversation..."
@@ -1713,13 +1713,13 @@
     "defaultMessage": "restarting session..."
   },
   "loadingGoose.streaming": {
-    "defaultMessage": "Lira is working on it…"
+    "defaultMessage": "is working on it…"
   },
   "loadingGoose.thinking": {
-    "defaultMessage": "Lira is thinking…"
+    "defaultMessage": "is thinking…"
   },
   "loadingGoose.waiting": {
-    "defaultMessage": "Lira is waiting…"
+    "defaultMessage": "is waiting…"
   },
   "localInferenceSettings.deleteConfirm": {
     "defaultMessage": "Delete this model? You can re-download it later."
