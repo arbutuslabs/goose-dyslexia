@@ -4,6 +4,7 @@ import { View, ViewOptions } from '../../utils/navigationUtils';
 import ModelsSection from './models/ModelsSection';
 import ExternalBackendSection from './app/ExternalBackendSection';
 import AppSettingsSection from './app/AppSettingsSection';
+import TemplateSettings from './templates/TemplateSettings';
 import ConfigSettings from './config/ConfigSettings';
 import PromptsSettingsSection from './PromptsSettingsSection';
 import type { ExtensionConfig } from '../../types/extensions';
@@ -83,6 +84,22 @@ export default function SettingsView({
   viewOptions: SettingsViewOptions;
 }) {
   const [activeTab, setActiveTab] = useState('models');
+  // Tutor mode shows only the editable templates; developer mode is the full
+  // settings surface. Persisted so it survives relaunch.
+  const [settingsMode, setSettingsMode] = useState<'tutor' | 'developer'>('tutor');
+
+  useEffect(() => {
+    window.electron
+      .getSetting('settingsMode')
+      .then((value) => setSettingsMode(value === 'developer' ? 'developer' : 'tutor'))
+      .catch(() => {});
+  }, []);
+
+  const handleModeChange = async (mode: 'tutor' | 'developer') => {
+    setSettingsMode(mode);
+    await window.electron.setSetting('settingsMode', mode);
+  };
+
   const hasTrackedInitialTab = useRef(false);
   const { localInference } = useFeatures();
   const intl = useIntl();
@@ -154,10 +171,30 @@ export default function SettingsView({
             <div className="flex flex-col page-transition">
               <div className="flex justify-between items-center mb-1">
                 <h1 className="text-4xl font-light">{intl.formatMessage(i18n.title)}</h1>
+                <div className="flex items-center gap-1 rounded-lg border border-border-subtle p-1">
+                  {(['tutor', 'developer'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => void handleModeChange(mode)}
+                      className={`rounded-md px-3 py-1 text-sm capitalize transition-colors ${
+                        settingsMode === mode
+                          ? 'bg-background-tertiary/60 text-text-primary'
+                          : 'text-text-secondary hover:text-text-primary'
+                      }`}
+                    >
+                      {mode}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
+          {settingsMode === 'tutor' ? (
+            <div className="flex-1 min-h-0 overflow-y-auto px-8">
+              <TemplateSettings />
+            </div>
+          ) : (
           <div className="flex-1 min-h-0 relative px-6">
             <Tabs
               value={activeTab}
@@ -289,6 +326,7 @@ export default function SettingsView({
               </ScrollArea>
             </Tabs>
           </div>
+          )}
         </div>
       </MainPanelLayout>
     </>

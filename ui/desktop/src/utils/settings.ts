@@ -48,6 +48,7 @@ export interface Settings {
   responseStyle: string;
   showPricing: boolean;
   showToolCalls: boolean;
+  settingsMode: 'tutor' | 'developer';
   seenAnnouncementIds: string[];
 }
 
@@ -91,6 +92,8 @@ export const defaultSettings: Settings = {
   // Hidden by default: tutors don't need the mechanics, only the conversation.
   // Errors and approval prompts show regardless of this setting.
   showToolCalls: false,
+  // Tutors are the default audience; developer mode exposes the full settings.
+  settingsMode: 'tutor',
   seenAnnouncementIds: [],
 };
 

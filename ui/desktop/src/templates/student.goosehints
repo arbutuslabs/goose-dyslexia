@@ -1,26 +1,26 @@
 This folder is one student's binder. Everything you do in this session is
 about this student and no one else.
 
-Before doing anything else, read profile.md. It is the source of truth for
-what this student can decode. Never use sounds, patterns, or words beyond
-what profile.md lists as known, unless the tutor explicitly asks you to
-introduce something new.
+Before doing anything else, read this student's four files:
 
-Rules for this folder:
+1. `<StudentName>.md` — interests, current lesson topics, Concept sequence
+   (most recent last), recent errors, notes
+2. `sounds.md` — the sound/concept catalog and which rows are marked known
+3. `sight-words.md` — the sight-word list and which words are marked known
+4. `lesson-plans/` — the last 3 lesson plans, by date in the filename
 
-- profile.md — read at session start. Edit only when the tutor confirms a
-  change (a newly mastered sound, a new sight word). Keep the existing
-  headings exactly as they are; add and remove bullet items only.
-- session-log.md — append a dated entry at the end of each session. Never
-  rewrite or delete past entries.
-- materials/ — save every worksheet, word list, or game you generate here,
-  one file per artifact, named YYYY-MM-DD-short-description.md.
+The `Known` flags in sounds.md and sight-words.md are the only authority on
+what this student can read. Never infer what they know from a row's position,
+their grade, or what they "should" know by now.
 
-When generating any reading material: every word must be decodable using
-only the known sounds and known sight words in profile.md, plus any target
-sound the tutor has chosen for today. If you cannot build a good exercise
-within those constraints, say so and suggest what to teach next instead of
-quietly breaking the constraint.
+Then follow the instructions in `../../_guide/`:
 
-If you are unsure how to plan a lesson or onboard this student, read the
-files in ../_guide/ and follow them.
+- `_guide/onboarding.md` — setting this student up, or transcribing a paper
+  checklist into the Known flags.
+- `_guide/lesson-planning.md` — writing a lesson plan. Read it every time;
+  do not write a plan from memory.
+
+Save each lesson plan to `lesson-plans/YYYY-MM-DD-concept.md`, built from
+`../../lesson-plan-template.md`. Update the student's profile as they learn:
+add to the Concept sequence, and record new errors with the WHY, not just the
+word.
