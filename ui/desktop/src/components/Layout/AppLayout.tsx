@@ -50,6 +50,10 @@ const AppLayoutContent: React.FC<AppLayoutContentProps> = ({ activeSessions }) =
   const safeIsMacOS = (window?.electron?.platform || 'darwin') === 'darwin';
   const chatContext = useChatContext();
   const isOnPairRoute = location.pathname === '/pair';
+  // The files panel is scoped to a student's session, so it has nothing to show
+  // on the student picker. Hide it and its opener there — the panel stays
+  // mounted so tree and editor state survive the round trip.
+  const isOnHub = location.pathname === '/';
 
   const [isFullScreen, setIsFullScreen] = useState(false);
 
@@ -161,7 +165,8 @@ const AppLayoutContent: React.FC<AppLayoutContentProps> = ({ activeSessions }) =
     };
   }, [setFilesWidth]);
 
-  const filesRootDir = useChatWorkingDir(isFilesExpanded);
+  const showFilesPanel = isFilesExpanded && !isOnHub;
+  const filesRootDir = useChatWorkingDir(showFilesPanel);
 
   if (!chatContext) {
     throw new Error('AppLayoutContent must be used within ChatProvider');
@@ -198,7 +203,7 @@ const AppLayoutContent: React.FC<AppLayoutContentProps> = ({ activeSessions }) =
       {/* Files panel opener, top-right above where the panel appears. Only
           shown while collapsed — the open panel carries its own collapse
           button in its header. */}
-      {!isFilesExpanded && (
+      {!isFilesExpanded && !isOnHub && (
         <div
           style={{ zIndex: Z_INDEX.HEADER }}
           className={cn('absolute right-4 flex items-center', headerTop)}
@@ -256,7 +261,7 @@ const AppLayoutContent: React.FC<AppLayoutContentProps> = ({ activeSessions }) =
         <motion.div
           key="files-panel"
           initial={false}
-          animate={{ width: isFilesExpanded ? filesWidth : 0 }}
+          animate={{ width: showFilesPanel ? filesWidth : 0 }}
           transition={
             isFilesDragging ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 40 }
           }
@@ -266,11 +271,11 @@ const AppLayoutContent: React.FC<AppLayoutContentProps> = ({ activeSessions }) =
           <div className="w-full h-full overflow-hidden rounded-xl border border-border-primary">
             <FilesPanel
               rootDir={filesRootDir}
-              active={isFilesExpanded}
+              active={showFilesPanel}
               onCollapse={toggleFilesPanel}
             />
           </div>
-          {isFilesExpanded && (
+          {showFilesPanel && (
             <div
               className="absolute left-0 top-0 h-full w-2 cursor-col-resize hover:bg-border-primary/30 transition-colors"
               onMouseDown={handleFilesResizeMouseDown}

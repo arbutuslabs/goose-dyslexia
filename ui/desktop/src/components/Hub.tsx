@@ -40,13 +40,20 @@ type WorkspaceState =
   | { status: 'needs-setup'; root: string }
   | { status: 'ready'; root: string; students: StudentEntry[] };
 
+// These are the tutor's opening turn, so they are written in the tutor's voice
+// and name the guide the agent should follow. The system prompt already lists
+// what each guide covers; these just say which situation we are in.
+
 /** First message sent when opening a session for an existing student. */
 const sessionKickoff = (name: string) =>
-  `Starting a session with ${name}. Read their profile.md and the recent session log, then help me get started.`;
+  `I'm starting a session with ${name}. Follow _guide/lesson-planning.md: read their ` +
+  `profile, sounds.md, sight-words.md, and their last few lesson plans, then tell me ` +
+  `where we left off and what you'd suggest for today before writing anything.`;
 
 /** First message sent right after a new student binder is created. */
 const onboardingKickoff = (name: string) =>
-  `I just added ${name} as a new student. Their profile.md is empty — walk me through onboarding them.`;
+  `I've just added ${name} as a new student. Their folder is set up but empty. ` +
+  `Follow _guide/onboarding.md and walk me through onboarding them one question at a time.`;
 
 function useClock(): { time: string; meridiem: string; hour: number } {
   const [now, setNow] = useState(() => new Date());
