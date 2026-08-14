@@ -989,8 +989,9 @@ pre:has(> code.bg-inline-code) {
 .mira-loader {
   display: block;
   /* The stroke is 4.7 units on an 804-unit viewBox, so it renders sub-pixel
-     below ~170px wide. 180px keeps it just over 1px and legible. */
-  width: 180px;
+     below ~170px wide. 180px keeps it just over 1px and legible. Override per
+     instance with --mira-width; a Tailwind w-* class would lose to this rule. */
+  width: var(--mira-width, 180px);
   height: auto;
   overflow: visible;
   /* colour is inherited — the stroke is currentColor */
@@ -1007,7 +1008,9 @@ pre:has(> code.bg-inline-code) {
   stroke-dasharray: 1 1;
   stroke-dashoffset: 1;
 
-  animation-duration: 3.2s;
+  /* Overridable per instance: the boot splash runs faster so the word
+     finishes drawing before the app is ready to replace it. */
+  animation-duration: var(--mira-duration, 3.2s);
   animation-timing-function: linear;  /* pacing lives in the keyframes */
   animation-iteration-count: infinite;
 }

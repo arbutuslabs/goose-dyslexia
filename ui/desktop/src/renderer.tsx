@@ -3,14 +3,22 @@ import ReactDOM from 'react-dom/client';
 import { IntlProvider } from 'react-intl';
 import { ConfigProvider } from './components/ConfigContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import SuspenseLoader from './suspense-loader';
+import SuspenseLoader, { SPLASH_DRAW_MS } from './suspense-loader';
 import { applyThemeTokens } from './theme/theme-tokens';
 import { currentLocale, currentMessageLocale, loadMessages } from './i18n';
 
 // Apply theme tokens to :root before first paint.
 applyThemeTokens();
 
-const App = lazy(() => import('./App'));
+// Hold the splash long enough for the wordmark to finish drawing. The bundle
+// usually resolves sooner, which left the animation cut off mid-word.
+const App = lazy(async () => {
+  const [module] = await Promise.all([
+    import('./App'),
+    new Promise((resolve) => setTimeout(resolve, SPLASH_DRAW_MS)),
+  ]);
+  return module;
+});
 
 let warnedFallbackLocale = false;
 function handleIntlError(err: { code: string; message?: string }) {

@@ -1,5 +1,9 @@
+import React from 'react';
+
 interface LiraLoaderProps {
   className?: string;
+  /** Use `--mira-width` here to resize; a Tailwind w-* class loses to the base rule. */
+  style?: React.CSSProperties;
 }
 
 /**
@@ -13,10 +17,11 @@ interface LiraLoaderProps {
  * Styles live in styles/main.css under "Lira loader" — including the nine
  * per-contour keyframe schedules, which are generated, not hand-written.
  */
-export default function LiraLoader({ className = '' }: LiraLoaderProps) {
+export default function LiraLoader({ className = '', style }: LiraLoaderProps) {
   return (
     <svg
       className={`mira-loader ${className}`}
+      style={style}
       viewBox="0 0 804.2 272.2"
       role="progressbar"
       aria-label="Loading"
