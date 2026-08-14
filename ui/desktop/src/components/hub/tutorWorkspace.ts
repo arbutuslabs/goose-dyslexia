@@ -15,6 +15,8 @@ import profileTemplate from '../../templates/STUDENT-NAME.md?raw';
 import soundsTemplate from '../../templates/sounds.md?raw';
 import sightWordsTemplate from '../../templates/sight-words.md?raw';
 import lessonPlanTemplate from '../../templates/lesson-plan-template.md?raw';
+import exportScript from '../../templates/export/export-pdf.sh?raw';
+import schoolTexTemplate from '../../templates/export/school-template.tex?raw';
 import lessonPlanningGuide from '../../templates/guide/lesson-planning.md?raw';
 import onboardingGuide from '../../templates/guide/onboarding.md?raw';
 
@@ -81,6 +83,13 @@ export async function scaffoldWorkspace(root: string): Promise<void> {
   }
   // The blank plan every lesson is built from; the guide files reference it.
   await window.electron.writeFile(join(root, 'lesson-plan-template.md'), lessonPlanTemplate);
+
+  // PDF export: the pandoc/LaTeX pair that turns a lesson's YAML into the
+  // school's printed form. The .tex owns the field names the template must match.
+  const exportDir = join(root, '_export');
+  await window.electron.ensureDirectory(exportDir);
+  await window.electron.writeFile(join(exportDir, 'export-pdf.sh'), exportScript);
+  await window.electron.writeFile(join(exportDir, 'school-template.tex'), schoolTexTemplate);
 
   // New students are stamped from these files on disk, not from the bundle, so
   // a clinic can adapt the scope-and-sequence or profile layout to their own

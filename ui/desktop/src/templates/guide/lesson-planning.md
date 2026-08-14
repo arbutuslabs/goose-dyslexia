@@ -35,6 +35,49 @@ When a student has fewer than 3 lesson plans, read all of them. When the folder 
 1. **Never infer what a student knows from row position.** The `Known` flag is the only authority on what is allowed in content. A student may have VCe `true` while VCCV is still `false` — that student reads 1-syllable VCe words (safe, brine, home) and NO 2-syllable words at all, because no division type is known yet. The reverse is equally possible.
 2. **For RECENCY — what counts as "the previous concept" and "most recently taught" — the student profile's "Concept sequence (most recent last)" is the authority, NOT sounds.md row order.** Read the profile's sequence list first and use its last entry as the previous concept. Only fall back to sounds.md order if the profile has no sequence recorded. This matters for the review sections, which must keep the genuinely previous concept warm.
 
+## How to write the plan out
+
+Save the finished plan to the student's `lesson-plans/` folder as
+`YYYY-MM-DD-concept.md`, built from `lesson-plan-template.md` at the workspace root.
+
+**The plan is YAML, not prose.** The template's front matter is the school's
+printed form: every key is a field on the page, and the field names must match
+`_export/school-template.tex` exactly. Do not rename, add, or remove keys — a
+renamed key silently prints as a blank line.
+
+- Fill a key with the content for that field. Multiple words go in one string,
+  comma-separated, unless the form gives numbered slots.
+- **Quote every value.** Auditory drill entries contain a colon
+  (`aud1: "e: e, ee, ea"`), and an unquoted colon is invalid YAML — pandoc then
+  fails on the whole file rather than that one field. Double quotes are safest;
+  escape any double quote inside a value as `\"`.
+- Keep entries short. Fields are fixed-width cells on a printed form; a long
+  string overflows the cell and is clipped rather than wrapped.
+- The numbered slots take one item each: `sp1`–`sp9` (review spelling),
+  `nsp1`–`nsp9` (new-concept spelling), `aud1`–`aud12` (auditory drill, written
+  without slashes).
+- Leave a key empty when the tutor fills that field in by hand. Empty prints as
+  a blank line, which is correct — do not invent content to fill space.
+- The oral reading passage goes in the body below the front matter, not in a
+  key. The form has room only for `oral_title`. Write the passage out in full
+  anyway; it is read from the file, not the PDF.
+
+## Exporting to PDF
+
+When the tutor asks for a PDF, or for the plan "on the school form", run:
+
+```
+bash _export/export-pdf.sh <the-lesson-plan.md> <output.pdf>
+```
+
+Paths are relative to the workspace root. Save the PDF beside the markdown in
+the same `lesson-plans/` folder.
+
+This needs `pandoc` and a LaTeX engine (`pdflatex` or `tectonic`) installed on
+the machine. If the script reports one is missing, say so plainly and tell the
+tutor what to install — do not try to produce the PDF another way, and do not
+hand-write LaTeX. The markdown plan is still complete and usable without it.
+
 ## Lesson Plan Criteria:
 
 **Focused Reteach :

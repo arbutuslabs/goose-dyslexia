@@ -1,82 +1,112 @@
-Student: _______________________  Grade: _____  Lesson # _____        Date: _______________________
-LS Name:  Ms.Chernen
-Lesson Objective: _______________________        Previous Concept: _______________________
+---
+# Lesson plan. The YAML below fills the school's printed form — every key here
+# is a field on the page. Leave a key empty and that field prints as a blank
+# line, which is what you want for anything the tutor fills in by hand.
+#
+# Field names are fixed: they must match _export/school-template.tex exactly.
+# Do not rename, add, or remove keys.
+#
+# The oral reading passage goes in the body below this block, not in a key —
+# the form only has room for its title.
+#
+# QUOTE EVERY VALUE. Auditory drill entries contain a colon ("e: e, ee, ea"),
+# and an unquoted colon is invalid YAML — it fails the whole export, not just
+# that field. When in doubt, wrap the value in double quotes.
 
-Cumulative Review Sections  (contains a mixe of reviwe concepts of preveiously taught concepts but doe not include today's focus sound)
+# ── Header ────────────────────────────────────────────────────────────────
+student:
+grade:
+lesson_number:
+date:
+ls_name:
+lesson_objective:
+previous_concept:
 
-Blending based on previously taught concept and errors: 
+# ── Errors from last lesson (one short note per strand) ───────────────────
+errors_pa:
+errors_handwriting:
+errors_visual_drill:
+errors_auditory_drill:
+errors_syllable_work:
+errors_reading:
+errors_spelling:
 
- _______________________   _______________________   _______________________   _______________________   _______________________   _______________________
+# ── Warm-up ───────────────────────────────────────────────────────────────
+pa_activity:
+handwriting_review:
+handwriting_introduce:
 
-Cumulative Review Auditory Drill**:  (10 review sounds)   / /__________  / /__________
-//__________  / /__________  / /__________  / /__________
-/ /__________  / /__________  / /__________  / /__________
+# ── Visual drill ──────────────────────────────────────────────────────────
+visual_consonants:
+visual_vowels:
+visual_morphemes:
 
-Cumulative Review Syllables / Syllable / Morpheme Division**:
-Type / Pattern:
+# ── Blending (nonsense words) ─────────────────────────────────────────────
+blending:
 
-Words:  _______________________   _______________________   _______________________
+# ── Auditory drill: one sound per slot, no slashes (e.g. `e: e, ee, ea`) ──
+aud1:
+aud2:
+aud3:
+aud4:
+aud5:
+aud6:
+aud7:
+aud8:
+aud9:
+aud10:
+aud11:
+aud12:
 
+# ── Syllable / morpheme division ──────────────────────────────────────────
+syllable_type:
+syllable_words:
+
+# ── Cumulative review ─────────────────────────────────────────────────────
+language_concept_review:
+reading_words:
+reading_sentences:
+
+# Review spelling — nine words, one per slot
+sp1:
+sp2:
+sp3:
+sp4:
+sp5:
+sp6:
+sp7:
+sp8:
+sp9:
+spelling_sentences:
+
+# ── New concept or focused reteach ────────────────────────────────────────
+new_concept:
+new_introduction:
+new_reading_words:
+new_reading_sentences:
+
+# New concept spelling — nine words, one per slot
+nsp1:
+nsp2:
+nsp3:
+nsp4:
+nsp5:
+nsp6:
+nsp7:
+nsp8:
+nsp9:
+new_spelling_sentences:
+
+# ── Non-phonetic (sight) words ────────────────────────────────────────────
+np_review:
+np_new:
+
+# ── Oral reading ──────────────────────────────────────────────────────────
+oral_title:
 ---
 
+## Oral reading passage
 
-Cumulative Reading Review Words:  (25 words 5×5 grid  25 foont: 2-3 words based on previous errors,  5 words use the previous taught concept, random order)
-
-
-Cumulative Reading Review Sentences:  (5 sentences )
-
----
-
-### Cumulative Review Spelling
-
-**Spelling (SOS)**
-Words:  
-(9 words: 2-3 words based on previous errors,  4 words use the previous taught concept, random order
-
-1_______________  4_______________  7_______________
-2_______________  5_______________  8_______________
-3_______________  6_______________  9_______________
-
-Phrases and Sentences: (1-2)
-_______________________________________________________
-_______________________________________________________
-_______________________________________________________
-
----
-
-### New Concept or Focused Reteach
-
-**Introduction or Focused Review:**
-concept ______________________________________________________
-
-**Reading:**
-Words: (10-15, 25 font: each word contaons focus sound)
-
-Phrases / Sentences: (5 sentences)
-
----
-
-**Spelling:**
-Words: (9 words each word contain focus sound)
-
-1_______________  4_______________  7_______________
-2_______________  5_______________  8_______________
-3_______________  6_______________  9_______________
-
-Phrases / Sentences (2 short sentences) ______________________________________________________
-_______________________________________________________
-
----
-
-**Non-phonetic Words:** (new / review)
-Review: _____________  _____________  _____________
-New:  _____________
-
----
-
-### Oral Reading
-
-**Oral Reading:**  1-2 pages decodable text
-Title:
-
-_______________________________________________________
+<!-- The full decodable passage goes here. The printed form has room only for
+     the title, so this body does not appear in the PDF — print or read it
+     separately. Write it out in full regardless; never leave a placeholder. -->

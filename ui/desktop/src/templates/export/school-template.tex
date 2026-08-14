@@ -1,0 +1,199 @@
+% school-template.tex
+% Exact replica of "Marie's Lesson Plan 2024.pdf" (Fraser Academy OG lesson form).
+% Every fillable field is a pandoc variable set in the lesson markdown's YAML
+% frontmatter. Missing/empty fields render as the form's blank blue lines.
+%
+% Field schema (all optional, all strings unless noted):
+%   student, grade, lesson_number, date, ls_name, lesson_objective, previous_concept
+%   errors_pa, errors_handwriting, errors_visual_drill, errors_auditory_drill,
+%     errors_syllable_work, errors_reading, errors_spelling
+%   pa_activity, handwriting_review, handwriting_introduce
+%   visual_consonants, visual_vowels, visual_morphemes, blending
+%   aud1 .. aud12            (auditory drill sounds, without slashes)
+%   syllable_type, syllable_words
+%   language_concept_review, reading_words, reading_sentences
+%   sp1 .. sp9               (cumulative review spelling words)
+%   spelling_sentences
+%   new_concept, new_introduction, new_reading_words, new_reading_sentences
+%   nsp1 .. nsp9             (new concept spelling words)
+%   new_spelling_sentences
+%   np_review, np_new        (non-phonetic words)
+%   oral_title
+\documentclass[10pt]{article}
+\usepackage[margin=0.7in,bottom=0.9in]{geometry}
+\usepackage{tabularx}
+\usepackage[table]{xcolor}
+\usepackage{array}
+% The original form is set in Arial. Tectonic runs XeTeX, where the classic
+% helvet package silently falls back to Latin Modern, so load the real system
+% font via fontspec there; keep helvet for a pdflatex run.
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage{helvet}
+  \renewcommand{\familydefault}{\sfdefault}
+\else
+  \usepackage{fontspec}
+  \setmainfont{Arial}
+\fi
+\usepackage{fancyhdr}
+\setlength{\parindent}{0pt}
+
+\definecolor{hdrblue}{RGB}{198,217,241} % section header cells
+\definecolor{barblue}{RGB}{184,204,228} % section divider bars
+\definecolor{inkblue}{RGB}{17,85,204}   % filled-in entries / blank lines
+
+% filled-in value (blue, like the typed entries on the original form)
+\newcommand{\entry}[1]{\textcolor{inkblue}{#1}}
+% blank fill-in line of a given width
+\newcommand{\blankline}[1]{\textcolor{inkblue}{\underline{\hspace{#1}}}}
+% bold underlined activity label
+\newcommand{\lbl}[1]{\underline{\textbf{#1}}}
+% label line with right-aligned bold time allotment
+\newcommand{\timedline}[2]{{\parfillskip0pt\relax #1\hfill\mbox{\textbf{(#2)}}\par}}
+% auditory drill slot: /sound/ ____
+\newcommand{\aslot}[1]{\entry{/\,#1\,/}\,\blankline{0.45in}}
+
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot[L]{Colleen Chow ATF/OGA}
+\fancyfoot[C]{}
+\fancyfoot[R]{}
+\renewcommand{\headrulewidth}{0pt}
+
+\begin{document}
+
+% ============================= PAGE 1 =============================
+
+% --- Top header block ---
+Student: $if(student)$\entry{\underline{~$student$~}}$else$\blankline{1.5in}$endif$\hfill
+Grade: $if(grade)$\entry{\underline{~$grade$~}}$else$\blankline{0.4in}$endif$\hfill
+Lesson \# $if(lesson_number)$\entry{\underline{~$lesson_number$~}}$else$\blankline{0.5in}$endif$\hfill
+Date: $if(date)$\entry{\underline{~$date$~}}$else$\blankline{1.3in}$endif$
+
+\vspace{0.15em}
+LS Name: $if(ls_name)$\entry{\underline{~$ls_name$~}}$else$\blankline{1.4in}$endif$
+
+\vspace{0.15em}
+Lesson Objective: $if(lesson_objective)$\entry{\underline{~$lesson_objective$~}}$else$\blankline{1.2in}$endif$\hspace{0.5in}
+Previous Concept: $if(previous_concept)$\entry{\underline{~$previous_concept$~}}$else$\blankline{1.2in}$endif$
+
+\vspace{1.2em}
+
+% --- Errors table ---
+\begin{tabularx}{\textwidth}{|p{1.55in}|X|}
+\hline
+\multicolumn{2}{|l|}{Errors: Target word/student response\rule[-0.6em]{0pt}{1.8em}} \\ \hline
+PA\rule[-0.6em]{0pt}{1.8em} & $if(errors_pa)$\entry{$errors_pa$}$endif$ \\ \hline
+Handwriting\rule[-0.6em]{0pt}{1.8em} & $if(errors_handwriting)$\entry{$errors_handwriting$}$endif$ \\ \hline
+Visual Drill\rule[-0.6em]{0pt}{1.8em} & $if(errors_visual_drill)$\entry{$errors_visual_drill$}$endif$ \\ \hline
+Auditory Drill\rule[-0.6em]{0pt}{1.8em} & $if(errors_auditory_drill)$\entry{$errors_auditory_drill$}$endif$ \\ \hline
+Syllable Work\rule[-0.6em]{0pt}{1.8em} & $if(errors_syllable_work)$\entry{$errors_syllable_work$}$endif$ \\ \hline
+Reading\rule[-0.6em]{0pt}{1.8em} & $if(errors_reading)$\entry{$errors_reading$}$endif$ \\ \hline
+Spelling\rule[-0.6em]{0pt}{1.8em} & $if(errors_spelling)$\entry{$errors_spelling$}$endif$ \\ \hline
+\end{tabularx}
+
+\vspace{1.2em}
+
+% --- Main skill grid, page 1 ---
+\begin{tabularx}{\textwidth}{|X|p{1.8in}|}
+\hline
+\multicolumn{1}{|>{\columncolor{hdrblue}}c|}{Skill Area} &
+\multicolumn{1}{>{\columncolor{hdrblue}}c|}{New Errors} \\ \hline
+% Phonological / Phonemic Awareness
+\timedline{\lbl{Phonological / Phonemic Awareness}:}{1 min}
+$if(pa_activity)$\entry{$pa_activity$}$endif$\rule[-1.2em]{0pt}{1em} & \\ \hline
+% Alphabet or Handwriting
+\timedline{\lbl{Alphabet or Handwriting}:}{2-3 min}
+Review: $if(handwriting_review)$\entry{\underline{~$handwriting_review$~}}$else$\blankline{1.1in}$endif$\hspace{0.35in}Introduce: $if(handwriting_introduce)$\entry{\underline{~$handwriting_introduce$~}}$else$\blankline{1.1in}$endif$\rule[-0.8em]{0pt}{1em} & \\ \hline
+\multicolumn{2}{|>{\columncolor{barblue}}l|}{Cumulative Review} \\ \hline
+% Visual Drill
+\timedline{\lbl{Visual Drill - Phonics Drill Cards / Morphemes}:}{3-5 min}
+Consonants: $if(visual_consonants)$\entry{$visual_consonants$}$endif$\newline
+Vowels: $if(visual_vowels)$\entry{$visual_vowels$}$endif$\newline
+Morphemes: $if(visual_morphemes)$\entry{$visual_morphemes$}$endif$\rule[-0.8em]{0pt}{1em} & \\ \hline
+% Blending
+\timedline{\lbl{Blending}: phonograms, morphemes, detached syllables (real or nonsense), or flip cards}{1 min}
+$if(blending)$\entry{$blending$}$endif$\rule[-0.8em]{0pt}{1em} & \\ \hline
+% Auditory Drill
+\timedline{\lbl{Auditory Drill}: (7-10 sounds)}{3 mins}
+\aslot{$if(aud1)$$aud1$$else$~$endif$}~\aslot{$if(aud2)$$aud2$$else$~$endif$}~\aslot{$if(aud3)$$aud3$$else$~$endif$}~\aslot{$if(aud4)$$aud4$$else$~$endif$}\newline
+\aslot{$if(aud5)$$aud5$$else$~$endif$}~\aslot{$if(aud6)$$aud6$$else$~$endif$}~\aslot{$if(aud7)$$aud7$$else$~$endif$}~\aslot{$if(aud8)$$aud8$$else$~$endif$}\newline
+\aslot{$if(aud9)$$aud9$$else$~$endif$}~\aslot{$if(aud10)$$aud10$$else$~$endif$}~\aslot{$if(aud11)$$aud11$$else$~$endif$}~\aslot{$if(aud12)$$aud12$$else$~$endif$}\rule[-0.8em]{0pt}{1em} & \\ \hline
+\multicolumn{1}{|>{\columncolor{barblue}}l|}{\underline{Cumulative Review Word Work}} & \\ \hline
+% Syllable division
+\timedline{\lbl{Syllables / Syllable / Morpheme Division}: (2-3 words)}{2 mins}
+Type / Pattern: $if(syllable_type)$\entry{$syllable_type$}$endif$
+
+\vspace{0.5em}
+Words: $if(syllable_words)$\entry{\underline{~$syllable_words$~}}$else$\blankline{1.2in}~\blankline{1.2in}~\blankline{1.2in}$endif$\rule[-1.2em]{0pt}{1em} & \\ \hline
+\end{tabularx}
+
+\newpage
+
+% ============================= PAGE 2 =============================
+
+\begin{tabularx}{\textwidth}{|X|p{1.8in}|}
+\hline
+% Language Concept Review
+\timedline{\lbl{Language Concept Review: coding, discrimination. structure}}{1-2 mins}
+\underline{(2-6 words)} $if(language_concept_review)$\entry{$language_concept_review$}$endif$\rule[-2.2em]{0pt}{1em} & \centering Reading Errors \tabularnewline \hline
+% Reading Words
+Reading Words: (20-40 / 25\% most recent concept) (practice) \hfill \textbf{(2 mins)}
+
+$if(reading_words)$\entry{$reading_words$}$endif$\rule[-1.8em]{0pt}{1em} & \\ \hline
+% Reading Phrases / Sentences
+\timedline{Reading Phrases / Sentences: (5-10)}{3 mins}
+$if(reading_sentences)$\entry{$reading_sentences$}$endif$\rule[-1.8em]{0pt}{1em} & \\ \hline
+\multicolumn{1}{|>{\columncolor{barblue}}l|}{\underline{Cumulative Review Spelling}} & \\ \hline
+% Spelling (SOS)
+\lbl{Spelling (SOS)} \textbf{(10 mins)}\newline
+Words: (5-10)\newline
+1.$if(sp1)$\entry{\underline{~$sp1$~}}$else$\blankline{1.15in}$endif$\hfill 4.$if(sp4)$\entry{\underline{~$sp4$~}}$else$\blankline{1.15in}$endif$\hfill 7.$if(sp7)$\entry{\underline{~$sp7$~}}$else$\blankline{1.15in}$endif$\newline
+2.$if(sp2)$\entry{\underline{~$sp2$~}}$else$\blankline{1.15in}$endif$\hfill 5.$if(sp5)$\entry{\underline{~$sp5$~}}$else$\blankline{1.15in}$endif$\hfill 8.$if(sp8)$\entry{\underline{~$sp8$~}}$else$\blankline{1.15in}$endif$\newline
+3.$if(sp3)$\entry{\underline{~$sp3$~}}$else$\blankline{1.15in}$endif$\hfill 6.$if(sp6)$\entry{\underline{~$sp6$~}}$else$\blankline{1.15in}$endif$\hfill 9.$if(sp9)$\entry{\underline{~$sp9$~}}$else$\blankline{1.15in}$endif$
+
+\vspace{0.5em}
+Phrases and Sentences: (1-2) $if(spelling_sentences)$\entry{$spelling_sentences$}$else$\blankline{2.4in}$endif$
+
+\vspace{0.4em}
+\blankline{4.6in}
+
+\vspace{0.4em}
+\blankline{4.6in}\rule[-0.8em]{0pt}{1em} & \centering Spelling Errors \tabularnewline \hline
+\multicolumn{2}{|>{\columncolor{barblue}}l|}{New Concept or Focused Reteach} \\ \hline
+% Introduction / Review  (the "/ /" matches the original form)
+\timedline{\lbl{Introduction / /Review:}}{15-25 mins}
+Concept: $if(new_concept)$\entry{$new_concept$}$endif$
+
+\vspace{0.5em}
+Introduction: $if(new_introduction)$\entry{\underline{~$new_introduction$~}}$else$\blankline{3.2in}$endif$\rule[-1.2em]{0pt}{1em} & \centering Reading Errors \tabularnewline \hline
+% New concept reading
+\textbf{Reading:}\newline
+Words: (10-15) $if(new_reading_words)$\entry{$new_reading_words$}$endif$
+
+\vspace{0.5em}
+Phrases / Sentences: (5-10) $if(new_reading_sentences)$\entry{$new_reading_sentences$}$endif$\rule[-0.8em]{0pt}{1em} & \\ \hline
+% New concept spelling
+\textbf{Spelling:}\newline
+Words: (8-10)\newline
+1.$if(nsp1)$\entry{\underline{~$nsp1$~}}$else$\blankline{1.15in}$endif$\hfill 4.$if(nsp4)$\entry{\underline{~$nsp4$~}}$else$\blankline{1.15in}$endif$\hfill 7.$if(nsp7)$\entry{\underline{~$nsp7$~}}$else$\blankline{1.15in}$endif$\newline
+2.$if(nsp2)$\entry{\underline{~$nsp2$~}}$else$\blankline{1.15in}$endif$\hfill 5.$if(nsp5)$\entry{\underline{~$nsp5$~}}$else$\blankline{1.15in}$endif$\hfill 8.$if(nsp8)$\entry{\underline{~$nsp8$~}}$else$\blankline{1.15in}$endif$\newline
+3.$if(nsp3)$\entry{\underline{~$nsp3$~}}$else$\blankline{1.15in}$endif$\hfill 6.$if(nsp6)$\entry{\underline{~$nsp6$~}}$else$\blankline{1.15in}$endif$\hfill 9.$if(nsp9)$\entry{\underline{~$nsp9$~}}$else$\blankline{1.15in}$endif$
+
+\vspace{0.5em}
+Phrases / Sentences (1-2) $if(new_spelling_sentences)$\entry{$new_spelling_sentences$}$else$\blankline{2.8in}$endif$
+
+\vspace{0.4em}
+\blankline{4.6in}\rule[-0.6em]{0pt}{1em} & \centering Spelling Errors \tabularnewline \hline
+\multicolumn{2}{|>{\columncolor{barblue}}l|}{\rule[-0.2em]{0pt}{1em}} \\ \hline
+% Non-phonetic words
+\timedline{\textbf{Non-phonetic Words:} (new / review)}{2 mins}
+Review: $if(np_review)$\entry{\underline{~$np_review$~}}$else$\blankline{0.8in}~\blankline{0.8in}~\blankline{0.8in}$endif$\newline
+New: $if(np_new)$\entry{\underline{~$np_new$~}}$else$\blankline{0.8in}$endif$\rule[-0.6em]{0pt}{1em} & \\ \hline
+\multicolumn{1}{|>{\columncolor{barblue}}l|}{Oral Reading} & \\ \hline
+% Oral reading
+\timedline{\textbf{Oral Reading:}}{10-15 mins}
+Title: $if(oral_title)$\entry{\underline{~$oral_title$~}}$else$\blankline{2.6in}$endif$ \hfill Reading level / Decodable\rule[-0.8em]{0pt}{1em} & \\ \hline
+\end{tabularx}
+
+\end{document}
