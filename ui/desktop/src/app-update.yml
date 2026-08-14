@@ -1,4 +1,4 @@
 provider: github
-owner: aaif-goose
-repo: goose
+owner: arbutuslabs
+repo: goose-dyslexia
 updaterCacheDirName: lira-updater

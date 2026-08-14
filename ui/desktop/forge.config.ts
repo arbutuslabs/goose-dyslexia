@@ -94,8 +94,8 @@ module.exports = {
       name: '@electron-forge/publisher-github',
       config: {
         repository: {
-          owner: process.env.GITHUB_OWNER || 'aaif-goose',
-          name: process.env.GITHUB_REPO || 'goose',
+          owner: process.env.GITHUB_OWNER || 'arbutuslabs',
+          name: process.env.GITHUB_REPO || 'goose-dyslexia',
         },
         prerelease: false,
         draft: true,
