@@ -16,7 +16,7 @@ import UpdateSection from './UpdateSection';
 import { COST_TRACKING_ENABLED, UPDATES_ENABLED } from '../../../updates';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import ThemeSelector from '../../GooseSidebar/ThemeSelector';
-import LiraWordmark from '../../../images/lira-wordmark.png';
+import LiraWordmark from '../../../images/lira-logo.png';
 import { SHOW_TOOL_CALLS_CHANGED } from '../../../hooks/useShowToolCalls';
 import TelemetrySettings from './TelemetrySettings';
 import { trackSettingToggled } from '../../../utils/analytics';
@@ -42,11 +42,6 @@ const i18n = defineMessages({
   taskNotificationsDesc: {
     id: 'settings.notifications.task.description',
     defaultMessage: 'Notify when Goose finishes a task while the window is in the background',
-  },
-  menuBarIcon: { id: 'settings.menuBarIcon.title', defaultMessage: 'Menu bar icon' },
-  menuBarIconDesc: {
-    id: 'settings.menuBarIcon.description',
-    defaultMessage: 'Show goose in the menu bar',
   },
   dockIcon: { id: 'settings.dockIcon.title', defaultMessage: 'Dock icon' },
   dockIconDesc: { id: 'settings.dockIcon.description', defaultMessage: 'Show goose in the dock' },
@@ -185,7 +180,6 @@ interface AppSettingsSectionProps {
 }
 
 export default function AppSettingsSection({ scrollToSection }: AppSettingsSectionProps) {
-  const [menuBarIconEnabled, setMenuBarIconEnabled] = useState(true);
   const [dockIconEnabled, setDockIconEnabled] = useState(true);
   const [wakelockEnabled, setWakelockEnabled] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -217,10 +211,6 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
   }, [scrollToSection]);
 
   useEffect(() => {
-    window.electron.getMenuBarIconState().then((enabled) => {
-      setMenuBarIconEnabled(enabled);
-    });
-
     window.electron.getWakelockState().then((enabled) => {
       setWakelockEnabled(enabled);
     });
@@ -236,33 +226,8 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
     }
   }, [isMacOS]);
 
-  const handleMenuBarIconToggle = async () => {
-    const newState = !menuBarIconEnabled;
-    // If we're turning off the menu bar icon and the dock icon is hidden,
-    // we need to show the dock icon to maintain accessibility
-    if (!newState && !dockIconEnabled && isMacOS) {
-      const success = await window.electron.setDockIcon(true);
-      if (success) {
-        setDockIconEnabled(true);
-      }
-    }
-    const success = await window.electron.setMenuBarIcon(newState);
-    if (success) {
-      setMenuBarIconEnabled(newState);
-      trackSettingToggled('menu_bar_icon', newState);
-    }
-  };
-
   const handleDockIconToggle = async () => {
     const newState = !dockIconEnabled;
-    // If we're turning off the dock icon and the menu bar icon is hidden,
-    // we need to show the menu bar icon to maintain accessibility
-    if (!newState && !menuBarIconEnabled) {
-      const success = await window.electron.setMenuBarIcon(true);
-      if (success) {
-        setMenuBarIconEnabled(true);
-      }
-    }
 
     // Disable the switch to prevent rapid toggling
     setIsDockSwitchDisabled(true);
@@ -387,22 +352,6 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
               <Switch
                 checked={notificationsEnabled}
                 onCheckedChange={handleNotificationsToggle}
-                variant="mono"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-text-primary text-xs">{intl.formatMessage(i18n.menuBarIcon)}</h3>
-              <p className="text-xs text-text-secondary max-w-md mt-[2px]">
-                {intl.formatMessage(i18n.menuBarIconDesc)}
-              </p>
-            </div>
-            <div className="flex items-center">
-              <Switch
-                checked={menuBarIconEnabled}
-                onCheckedChange={handleMenuBarIconToggle}
                 variant="mono"
               />
             </div>
@@ -563,7 +512,7 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
               <img
                 src={LiraWordmark}
                 alt="Lira"
-                className="h-8 w-auto dark:invert"
+                className="h-8 w-auto invert dark:invert-0"
               />
               <span className="text-2xl font-mono text-black dark:text-white">
                 {String(window.appConfig.get('GOOSE_VERSION') || 'Development')}

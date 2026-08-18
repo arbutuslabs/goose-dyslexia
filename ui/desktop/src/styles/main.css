@@ -527,6 +527,12 @@
   background-color: var(--color-neutral-500);
 }
 
+html {
+  /* Paired with body so nothing in the chain falls back to white during a
+     paint gap — e.g. the boot splash fading out before React paints. */
+  background-color: var(--color-background-primary);
+}
+
 body {
   background-color: var(--color-background-primary);
   -webkit-font-smoothing: antialiased;
@@ -1018,8 +1024,11 @@ pre:has(> code.bg-inline-code) {
 /* Respect reduced-motion: hold the finished mark and pulse it instead. */
 @media (prefers-reduced-motion: reduce) {
   .mira-loader path {
-    animation: mira-pulse 1.8s ease-in-out infinite;
-    stroke-dashoffset: 0;
+    /* !important is required: each path carries an inline animation-name, and
+       inline styles outrank a stylesheet rule — without this the draw plays
+       for reduced-motion users regardless. */
+    animation: mira-pulse 1.8s ease-in-out infinite !important;
+    stroke-dashoffset: 0 !important;
   }
   @keyframes mira-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 }
@@ -1070,4 +1079,57 @@ pre:has(> code.bg-inline-code) {
   0%, 52.64% { stroke-dashoffset: 1; }
   55.00%, 98.63% { stroke-dashoffset: 0; }
   100.00%, 100% { stroke-dashoffset: -1; }
+}
+
+/* Draw-once variant for the boot splash: same per-contour pacing,
+   rescaled so the draw fills the whole duration, then holds. */
+@keyframes mira-draw-0 {
+  0%, 0.00% { stroke-dashoffset: 1; }
+  20.53%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes mira-draw-1 {
+  0%, 20.53% { stroke-dashoffset: 1; }
+  25.40%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes mira-draw-2 {
+  0%, 25.40% { stroke-dashoffset: 1; }
+  36.40%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes mira-draw-3 {
+  0%, 36.40% { stroke-dashoffset: 1; }
+  40.40%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes mira-draw-4 {
+  0%, 40.40% { stroke-dashoffset: 1; }
+  51.98%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes mira-draw-5 {
+  0%, 51.98% { stroke-dashoffset: 1; }
+  72.60%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes mira-draw-6 {
+  0%, 72.60% { stroke-dashoffset: 1; }
+  78.18%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes mira-draw-7 {
+  0%, 78.18% { stroke-dashoffset: 1; }
+  95.71%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes mira-draw-8 {
+  0%, 95.71% { stroke-dashoffset: 1; }
+  100.00%, 100% { stroke-dashoffset: 0; }
+}
+
+.mira-loader--once path {
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+/* Splash: hold the finished mark, then fade the whole screen out. */
+@keyframes splash-fade-out {
+  to { opacity: 0; }
+}
+.splash-fade {
+  animation: splash-fade-out var(--splash-fade, 400ms) ease-in forwards;
+  animation-delay: var(--splash-fade-delay, 2400ms);
 }

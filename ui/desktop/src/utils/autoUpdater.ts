@@ -2,20 +2,14 @@ import { autoUpdater, UpdateInfo } from 'electron-updater';
 import {
   BrowserWindow,
   ipcMain,
-  nativeImage,
-  Tray,
   shell,
   app,
   dialog,
-  Menu,
-  MenuItemConstructorOptions,
   Notification,
 } from 'electron';
-import * as path from 'path';
 import * as fs from 'fs/promises';
 import log from './logger';
 import { githubUpdater } from './githubUpdater';
-import { loadRecentDirs } from './recentDirs';
 import { errorMessage } from './conversionUtils';
 import {
   trackUpdateCheckStarted,
@@ -27,7 +21,6 @@ import {
 } from './analytics';
 
 let updateAvailable = false;
-let trayRef: Tray | null = null;
 let isUsingGitHubFallback = false;
 let githubUpdateInfo: {
   latestVersion?: string;
@@ -163,7 +156,6 @@ export function registerUpdateIpcHandlers() {
 
             updateAvailable = true;
             lastUpdateState = { updateAvailable: true, latestVersion: result.latestVersion };
-            updateTrayIcon(true);
             sendStatusToWindow('update-available', { version: result.latestVersion });
 
             if (!autoDownloadDisabled) {
@@ -180,7 +172,6 @@ export function registerUpdateIpcHandlers() {
 
             updateAvailable = false;
             lastUpdateState = { updateAvailable: false };
-            updateTrayIcon(false);
             sendStatusToWindow('update-not-available', {
               version: autoUpdater.currentVersion.version,
             });
@@ -355,10 +346,7 @@ export function registerUpdateIpcHandlers() {
 }
 
 // Configure auto-updater
-export function setupAutoUpdater(tray?: Tray) {
-  if (tray) {
-    trayRef = tray;
-  }
+export function setupAutoUpdater() {
 
   log.info('Setting up auto-updater...');
   log.info(`Current app version: ${app.getVersion()}`);
@@ -510,7 +498,6 @@ export function setupAutoUpdater(tray?: Tray) {
 
                 updateAvailable = true;
                 lastUpdateState = { updateAvailable: true, latestVersion: result.latestVersion };
-                updateTrayIcon(true);
                 sendStatusToWindow('update-available', { version: result.latestVersion });
 
                 if (!autoDownloadDisabled) {
@@ -527,7 +514,6 @@ export function setupAutoUpdater(tray?: Tray) {
 
                 updateAvailable = false;
                 lastUpdateState = { updateAvailable: false };
-                updateTrayIcon(false);
                 sendStatusToWindow('update-not-available', {
                   version: autoUpdater.currentVersion.version,
                 });
@@ -569,7 +555,6 @@ export function setupAutoUpdater(tray?: Tray) {
     }
     updateAvailable = true;
     lastUpdateState = { updateAvailable: true, latestVersion: info.version };
-    updateTrayIcon(true);
     sendStatusToWindow('update-available', info);
   });
 
@@ -582,7 +567,6 @@ export function setupAutoUpdater(tray?: Tray) {
     });
     updateAvailable = false;
     lastUpdateState = { updateAvailable: false };
-    updateTrayIcon(false);
     sendStatusToWindow('update-not-available', info);
   });
 
@@ -621,7 +605,6 @@ export function setupAutoUpdater(tray?: Tray) {
           };
 
           updateAvailable = true;
-          updateTrayIcon(true);
           sendStatusToWindow('update-available', { version: result.latestVersion });
 
           if (!autoDownloadDisabled) {
@@ -632,7 +615,6 @@ export function setupAutoUpdater(tray?: Tray) {
           }
         } else {
           updateAvailable = false;
-          updateTrayIcon(false);
           sendStatusToWindow('update-not-available', {
             version: autoUpdater.currentVersion.version,
           });
@@ -749,125 +731,6 @@ async function githubAutoDownload(
   }
 }
 
-function updateTrayIcon(hasUpdate: boolean) {
-  if (!trayRef) return;
-
-  if (process.env.GOOSE_VERSION) {
-    hasUpdate = false;
-  }
-
-  const isDev = !app.isPackaged;
-  let iconPath: string;
-
-  if (hasUpdate) {
-    // Use icon with update indicator
-    if (isDev) {
-      iconPath = path.join(process.cwd(), 'src', 'images', 'iconTemplateUpdate.png');
-    } else {
-      iconPath = path.join(process.resourcesPath, 'images', 'iconTemplateUpdate.png');
-    }
-    trayRef.setToolTip('Goose - Update Available');
-  } else {
-    // Use normal icon
-    if (isDev) {
-      iconPath = path.join(process.cwd(), 'src', 'images', 'iconTemplate.png');
-    } else {
-      iconPath = path.join(process.resourcesPath, 'images', 'iconTemplate.png');
-    }
-    trayRef.setToolTip('Goose');
-  }
-
-  const icon = nativeImage.createFromPath(iconPath);
-  if (process.platform === 'darwin') {
-    // Mark as template for macOS to handle dark/light mode
-    icon.setTemplateImage(true);
-  }
-  trayRef.setImage(icon);
-
-  // Update tray menu when icon changes
-  updateTrayMenu(hasUpdate);
-}
-
-// Function to open settings and scroll to update section
-function openUpdateSettings() {
-  const windows = BrowserWindow.getAllWindows();
-  if (windows.length > 0) {
-    const mainWindow = windows[0];
-    mainWindow.show();
-    mainWindow.focus();
-    // Send message to open settings and scroll to update section
-    mainWindow.webContents.send('set-view', 'settings', 'update');
-  }
-}
-
-// Export function to update tray menu
-export function updateTrayMenu(hasUpdate: boolean) {
-  if (!trayRef) return;
-
-  const menuItems: MenuItemConstructorOptions[] = [];
-
-  // Add update menu item if update is available
-  if (hasUpdate) {
-    menuItems.push({
-      label: 'Update Available...',
-      click: openUpdateSettings,
-    });
-  }
-
-  menuItems.push(
-    {
-      label: 'Show Window',
-      click: async () => {
-        const windows = BrowserWindow.getAllWindows();
-        if (windows.length === 0) {
-          log.info('No windows are open, creating a new one...');
-          // Get recent directories for the new window
-          const recentDirs = loadRecentDirs();
-          const openDir = recentDirs.length > 0 ? recentDirs[0] : null;
-
-          // Emit event to create new window (handled in main.ts)
-          ipcMain.emit('create-chat-window', {}, undefined, openDir);
-          return;
-        }
-
-        // Show all windows with offset
-        const initialOffsetX = 30;
-        const initialOffsetY = 30;
-
-        windows.forEach((win: BrowserWindow, index: number) => {
-          const currentBounds = win.getBounds();
-          const newX = currentBounds.x + initialOffsetX * index;
-          const newY = currentBounds.y + initialOffsetY * index;
-
-          win.setBounds({
-            x: newX,
-            y: newY,
-            width: currentBounds.width,
-            height: currentBounds.height,
-          });
-
-          if (!win.isVisible()) {
-            win.show();
-          }
-
-          win.focus();
-        });
-      },
-    },
-    { type: 'separator' },
-    { label: 'Quit', click: () => app.quit() }
-  );
-
-  const contextMenu = Menu.buildFromTemplate(menuItems);
-  trayRef.setContextMenu(contextMenu);
-}
-
-// Export functions to manage tray reference
-export function setTrayRef(tray: Tray) {
-  trayRef = tray;
-  // Update icon based on current update status
-  updateTrayIcon(updateAvailable);
-}
 
 export function getUpdateAvailable(): boolean {
   return updateAvailable;

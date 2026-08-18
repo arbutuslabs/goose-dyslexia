@@ -10,12 +10,12 @@ import {
   MenuItem,
   net,
   Notification,
+  nativeTheme,
   powerMonitor,
   powerSaveBlocker,
   screen,
   session,
   shell,
-  Tray,
 } from 'electron';
 import { pathToFileURL, format as formatUrl, URLSearchParams } from 'node:url';
 import { Buffer } from 'node:buffer';
@@ -43,12 +43,9 @@ import * as crypto from 'crypto';
 import * as yaml from 'yaml';
 import windowStateKeeper from 'electron-window-state';
 import {
-  getUpdateAvailable,
   registerUpdateIpcHandlers,
   setAutoDownloadDisabled,
-  setTrayRef,
   setupAutoUpdater,
-  updateTrayMenu,
 } from './utils/autoUpdater';
 import { UPDATES_ENABLED } from './updates';
 import './utils/recipeHash';
@@ -1230,6 +1227,20 @@ const createChat = async (
     await gooseServeLeases.cleanupLease(lease);
   };
 
+  // The window's own background shows during any paint gap — notably between
+  // the boot splash fading out and React painting the app. Electron defaults it
+  // to white, which flashes on a dark theme. Match the theme instead.
+  // Values track --color-background-primary in theme/theme-tokens.ts.
+  // The settings file is the source of truth for the theme. Resolve it here and
+  // hand it to the renderer below, so the pre-paint paths (index.html's inline
+  // script, applyThemeTokens) agree with ThemeContext instead of guessing from
+  // the OS while its async getSetting() round trip is still in flight.
+  const prefersDark = settings.useSystemTheme
+    ? nativeTheme.shouldUseDarkColors
+    : settings.theme === 'dark';
+  const resolvedTheme = prefersDark ? 'dark' : 'light';
+  const windowBackgroundColor = prefersDark ? '#22252a' : '#ffffff';
+
   let mainWindowState: ReturnType<typeof windowStateKeeper>;
   let mainWindow: BrowserWindow;
   try {
@@ -1240,9 +1251,13 @@ const createChat = async (
 
     mainWindow = new BrowserWindow({
       show: false,
+      backgroundColor: windowBackgroundColor,
       titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
       trafficLightPosition: process.platform === 'darwin' ? { x: 20, y: 16 } : undefined,
-      vibrancy: process.platform === 'darwin' ? 'window' : undefined,
+      // No vibrancy: it makes the native window background a translucent blur
+      // and overrides backgroundColor above, so the gap between show() and the
+      // renderer's first paint flashes the desktop through. Nothing here needs
+      // it — body is opaque (main.css), so the blur was never visible anyway.
       frame: process.platform !== 'darwin',
       // windowStateKeeper persists the outer window bounds (getBounds), so the
       // window must be restored by outer bounds too. With useContentSize the saved
@@ -1266,6 +1281,7 @@ const createChat = async (
           JSON.stringify({
             ...appConfig,
             GOOSE_LOCALE: getConfiguredGooseLocale(),
+            GOOSE_RESOLVED_THEME: resolvedTheme,
             GOOSE_WORKING_DIR: workingDir,
             REQUEST_DIR: dir,
             GOOSE_VERSION: version,
@@ -1593,91 +1609,6 @@ const createLauncher = () => {
   return launcherWindow;
 };
 
-// Track tray instance
-let tray: Tray | null = null;
-
-const destroyTray = () => {
-  if (tray) {
-    tray.destroy();
-    tray = null;
-  }
-};
-
-const disableTray = () => {
-  updateSettings((s) => {
-    s.showMenuBarIcon = false;
-  });
-};
-
-const createTray = () => {
-  destroyTray();
-
-  const possiblePaths = [
-    path.join(process.resourcesPath, 'images', 'iconTemplate.png'),
-    path.join(process.cwd(), 'src', 'images', 'iconTemplate.png'),
-    path.join(__dirname, '..', 'images', 'iconTemplate.png'),
-    path.join(__dirname, 'images', 'iconTemplate.png'),
-    path.join(process.cwd(), 'images', 'iconTemplate.png'),
-  ];
-
-  const iconPath = possiblePaths.find((p) => fsSync.existsSync(p));
-
-  if (!iconPath) {
-    console.warn('[Main] Tray icon not found. App will continue without system tray.');
-    disableTray();
-    return;
-  }
-
-  try {
-    tray = new Tray(iconPath);
-    setTrayRef(tray);
-    updateTrayMenu(getUpdateAvailable());
-
-    if (process.platform === 'win32') {
-      tray.on('click', showWindow);
-    }
-  } catch (error) {
-    console.error('[Main] Tray creation failed. App will continue without system tray.', error);
-    disableTray();
-    tray = null;
-  }
-};
-
-const showWindow = async () => {
-  const windows = BrowserWindow.getAllWindows();
-
-  if (windows.length === 0) {
-    log.info('No windows are open, creating a new one...');
-    const recentDirs = loadRecentDirs();
-    const openDir = recentDirs.length > 0 ? recentDirs[0] : null;
-    await createChat(app, { dir: openDir || undefined });
-    return;
-  }
-
-  const initialOffsetX = 30;
-  const initialOffsetY = 30;
-
-  // Iterate over all windows
-  windows.forEach((win, index) => {
-    const currentBounds = win.getBounds();
-    const newX = currentBounds.x + initialOffsetX * index;
-    const newY = currentBounds.y + initialOffsetY * index;
-
-    win.setBounds({
-      x: newX,
-      y: newY,
-      width: currentBounds.width,
-      height: currentBounds.height,
-    });
-
-    if (!win.isVisible()) {
-      win.show();
-    }
-
-    win.focus();
-  });
-};
-
 const buildRecentFilesMenu = () => {
   const recentDirs = loadRecentDirs();
   return recentDirs.map((dir) => ({
@@ -1928,7 +1859,6 @@ ipcMain.handle('get-setting', (_event, key: SettingKey) => {
 
 // Valid setting keys for runtime validation
 const validSettingKeys: Set<string> = new Set([
-  'showMenuBarIcon',
   'showDockIcon',
   'enableWakelock',
   'enableNotifications',
@@ -1941,6 +1871,8 @@ const validSettingKeys: Set<string> = new Set([
   'language',
   'responseStyle',
   'showPricing',
+  'showToolCalls',
+  'settingsMode',
   'seenAnnouncementIds',
   'disableAutoDownload',
 ]);
@@ -1964,6 +1896,13 @@ ipcMain.handle('set-setting', (_event, key: SettingKey, value: unknown) => {
 
   if (key === 'language') {
     appConfig.GOOSE_LOCALE = getConfiguredGooseLocale();
+  }
+
+  if (key === 'theme' || key === 'useSystemTheme') {
+    const dark = settings.useSystemTheme ? nativeTheme.shouldUseDarkColors : settings.theme === 'dark';
+    for (const win of BrowserWindow.getAllWindows()) {
+      win.setBackgroundColor(dark ? '#22252a' : '#ffffff');
+    }
   }
 
   // Re-register shortcuts if keyboard shortcuts changed
@@ -1992,30 +1931,6 @@ ipcMain.handle('get-acp-url', async (event) => {
   return gooseServeLeases.getAcpUrl(windowId) ?? null;
 });
 
-// Handle menu bar icon visibility
-ipcMain.handle('set-menu-bar-icon', async (_event, show: boolean) => {
-  updateSettings((s) => {
-    s.showMenuBarIcon = show;
-  });
-
-  if (show) {
-    createTray();
-  } else {
-    destroyTray();
-  }
-  return true;
-});
-
-ipcMain.handle('get-menu-bar-icon-state', () => {
-  try {
-    const settings = getSettings();
-    return settings.showMenuBarIcon ?? true;
-  } catch (error) {
-    console.error('Error getting menu bar icon state:', error);
-    return true;
-  }
-});
-
 // Handle dock icon visibility (macOS only)
 ipcMain.handle('set-dock-icon', async (_event, show: boolean) => {
   if (process.platform !== 'darwin') return false;
@@ -2028,8 +1943,9 @@ ipcMain.handle('set-dock-icon', async (_event, show: boolean) => {
   if (show) {
     app.dock?.show();
   } else {
-    // Only hide the dock if we have a menu bar icon to maintain accessibility
-    if (settings.showMenuBarIcon) {
+    // With no menu bar icon, the global focus shortcut is the only way back to a
+    // hidden app, so refuse to hide the dock unless one is actually registered.
+    if (getKeyboardShortcuts(settings).focusWindow) {
       app.dock?.hide();
       setTimeout(() => {
         focusWindow();
@@ -2521,11 +2437,11 @@ async function appMain() {
     callback({ cancel: false, requestHeaders: details.requestHeaders });
   });
 
-  if (settings.showMenuBarIcon) {
-    createTray();
-  }
-
-  if (process.platform === 'darwin' && !settings.showDockIcon && settings.showMenuBarIcon) {
+  if (
+    process.platform === 'darwin' &&
+    !settings.showDockIcon &&
+    getKeyboardShortcuts(settings).focusWindow
+  ) {
     app.dock?.hide();
   }
 
@@ -3198,8 +3114,9 @@ app.on('will-quit', async () => {
 });
 
 app.on('window-all-closed', () => {
-  // Only quit if we're not on macOS or don't have a tray icon
-  if (process.platform !== 'darwin' || !tray) {
+  // macOS apps stay resident with no windows open; the dock icon and the global
+  // focus shortcut both route through app.on('activate') to reopen one.
+  if (process.platform !== 'darwin') {
     app.quit();
   }
 });

@@ -267,11 +267,15 @@ export function buildMcpHostStyles(): McpUiHostStyles {
  * Resolve the current theme from localStorage / system preference.
  */
 export function getResolvedTheme(): 'light' | 'dark' {
-  const useSystem = localStorage.getItem('use_system_theme') !== 'false';
-  if (useSystem) {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  // The main process resolves the theme from the settings file and injects it,
+  // so this runs before first paint without an IPC round trip. Falling back to
+  // the OS preference would show the wrong theme for anyone whose app theme
+  // differs from their system theme, which is exactly the flash we're avoiding.
+  const injected = window.appConfig?.get('GOOSE_RESOLVED_THEME');
+  if (injected === 'dark' || injected === 'light') {
+    return injected;
   }
-  return localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
 /**

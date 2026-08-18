@@ -1,9 +1,5 @@
 #!/usr/bin/env sh
 
-# Create template icons for the menu bar
-convert -background none -resize 22x22 glyph.svg iconTemplate.png
-convert -background none -resize 44x44 glyph.svg iconTemplate@2x.png
-
 # Create main application icons from icon.svg
 convert -background none -resize 1024x1024 icon.svg icon.png
 convert -background none -resize 2048x2048 icon.svg icon@2x.png

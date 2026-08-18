@@ -8,62 +8,30 @@
     />
     <title>Lira</title>
     <script>
-      // Initialize theme before any content loads
+      // Initialize theme before any content loads.
+      //
+      // The main process resolves the theme from the settings file (the source of
+      // truth, and what ThemeContext reads) and injects it via preload, so this
+      // matches the final theme with no round trip. The OS preference is only a
+      // fallback for when the injected value is unavailable — relying on it
+      // outright shows the wrong theme to anyone whose app theme differs from
+      // their system theme.
       (function () {
-        function initializeTheme() {
+        function isDarkTheme() {
           try {
-            if (window.localStorage) {
-              const useSystemTheme = localStorage.getItem('use_system_theme') === 'true';
-              const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-              const savedTheme = localStorage.getItem('theme');
-              const isDark = useSystemTheme
-                ? systemPrefersDark
-                : savedTheme
-                  ? savedTheme === 'dark'
-                  : systemPrefersDark;
-
-              if (isDark) {
-                document.documentElement.classList.add('dark');
-                document.documentElement.style.colorScheme = 'dark';
-              } else {
-                document.documentElement.classList.remove('dark');
-                document.documentElement.style.colorScheme = 'light';
-              }
-            } else {
-              const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-              if (systemPrefersDark) {
-                document.documentElement.classList.add('dark');
-                document.documentElement.style.colorScheme = 'dark';
-              } else {
-                document.documentElement.classList.remove('dark');
-                document.documentElement.style.colorScheme = 'light';
-              }
+            var injected = window.appConfig && window.appConfig.get('GOOSE_RESOLVED_THEME');
+            if (injected === 'dark' || injected === 'light') {
+              return injected === 'dark';
             }
           } catch (error) {
-            console.warn(
-              'Failed to initialize theme from localStorage, using system preference:',
-              error
-            );
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (systemPrefersDark) {
-              document.documentElement.classList.add('dark');
-              document.documentElement.style.colorScheme = 'dark';
-            } else {
-              document.documentElement.classList.remove('dark');
-              document.documentElement.style.colorScheme = 'light';
-            }
+            console.warn('Failed to read injected theme, using system preference:', error);
           }
+          return window.matchMedia('(prefers-color-scheme: dark)').matches;
         }
 
-        // Run immediately
-        initializeTheme();
-
-        // Retry after DOM is ready if initial attempt failed
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', function () {
-            setTimeout(initializeTheme, 50);
-          });
-        }
+        var dark = isDarkTheme();
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
       })();
     </script>
     <link href="./src/styles/main.css" rel="stylesheet" />

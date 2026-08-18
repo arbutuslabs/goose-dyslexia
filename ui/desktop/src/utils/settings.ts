@@ -30,7 +30,6 @@ export type LanguageSetting =
 
 export interface Settings {
   // Desktop app settings
-  showMenuBarIcon: boolean;
   disableAutoDownload: boolean;
   showDockIcon: boolean;
   enableWakelock: boolean;
@@ -70,7 +69,6 @@ export const defaultKeyboardShortcuts: DefaultKeyboardShortcuts = {
 
 export const defaultSettings: Settings = {
   // Desktop app settings
-  showMenuBarIcon: true,
   disableAutoDownload: false,
   showDockIcon: true,
   enableWakelock: false,

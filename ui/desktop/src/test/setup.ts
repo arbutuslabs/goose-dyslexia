@@ -44,7 +44,6 @@ Object.assign(navigator, {
 
 // Mock settings store for tests
 const mockSettings: Record<string, unknown> = {
-  showMenuBarIcon: true,
   showDockIcon: true,
   enableWakelock: false,
   spellcheckEnabled: true,
