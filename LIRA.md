@@ -18,14 +18,14 @@ There are 9 phrases in total: 5 tied to a real file (known sounds, sight words, 
 ## Prompting
 
 - `crates/goose/src/prompts/system.md`: decodability as the top rule, the known-flag as the only authority on what a student can read, and the student folder layout. Also tells the agent to read large reference files selectively, because one full read of `sounds.md` stayed in context for the whole session.
-- `ui/desktop/src/templates/guide/`: the lesson-planning and onboarding guides the agent reads before writing.
+- `ui/desktop/src/templates/guide/`: the lesson planning and onboarding guides the agent reads before writing.
 - `ui/desktop/src/templates/`: student profile, `sounds.md`, `sight-words.md`, `student.goosehints` and the lesson plan template.
 
-## Tutor-facing UI
+## UI for tutors
 
 - `ui/desktop/src/hooks/useShowToolCalls.ts` and `GooseMessage.tsx`: hide tool calls and thinking by default. Tool calls awaiting approval or that failed are always shown.
-- Student picker and workspace scaffolding replace the chat hub. A per-chat files panel shows the student folder.
-- Navigation and startup noise trimmed for non-technical users.
+- Student picker and workspace scaffolding replace the chat hub. A files panel for each chat shows the student folder.
+- Navigation and startup noise trimmed for users without a technical background.
 
 ## Export
 
@@ -34,11 +34,11 @@ There are 9 phrases in total: 5 tied to a real file (known sounds, sight words, 
 ## Packaging
 
 - `lira://` protocol scheme, macOS bundle id, wordmark and icons.
-- `ui/desktop/src/utils/autoUpdater.ts` and `githubUpdater.ts`: auto-update checks this fork's releases, not upstream's.
+- `ui/desktop/src/utils/autoUpdater.ts` and `githubUpdater.ts`: automatic updates check this fork's releases, not upstream's.
 
 ## Cost tooling
 
 - `tools/log-model-tests.sh` walks goose's `sessions.db` after a round of trials, asks for a rating and thinking effort per session, and appends to a CSV.
 - `tools/model-test-log.template.csv` is the column layout.
 
-goose records per-turn `timeToFirstTokenMs` and `elapsedMs` in each assistant message's `metadata_json`, so latency comparisons need no extra instrumentation.
+goose records `timeToFirstTokenMs` and `elapsedMs` for every turn in each assistant message's `metadata_json`, so latency comparisons need no extra instrumentation.
