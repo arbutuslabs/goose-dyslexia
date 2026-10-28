@@ -43,9 +43,14 @@ Every tool call re-sends the entire conversation, so a session that takes sixty
 steps costs several times one that takes ten. Reach the answer in as few steps
 as you can.
 
-- **Read everything you need in one call.** Combine the reads:
-  `cat <StudentName>.md sounds.md sight-words.md lesson-plans/<most-recent>.md`
-  rather than one file per call.
+- **Batch the small reads, but never `cat sounds.md`.** That file is ~270 rows
+  and will dominate the rest of the conversation for the whole session. Read the
+  small files together:
+  `cat <StudentName>.md sight-words.md lesson-plans/<most-recent>.md`
+  For sounds, pull only what you need — `head -20 sounds.md` for the column
+  legend, `grep -n "| true" sounds.md` for what the student knows, and
+  `grep -n "| false" sounds.md | head -20` for what comes next. The line numbers
+  are the teaching order.
 - **You already know where the files are** — the paths are listed above. Don't
   use `find`, `tree`, or `ls` to locate them, and never look outside the current
   student's folder.

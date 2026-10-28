@@ -19,7 +19,9 @@ use crate::agents::tool_execution::{
 };
 use crate::agents::AgentEvent;
 use crate::config::GooseMode;
-use crate::conversation::message::{ActionRequiredData, Message, MessageContent, ToolRequest};
+use crate::conversation::message::{
+    ActionRequiredData, Message, MessageContent, SystemNotificationType, ToolRequest,
+};
 use crate::conversation::Conversation;
 use crate::hints::load_hints::SubdirectoryHintTracker;
 use crate::hooks::{HookContext, HookDecision, HookEvent, HookManager};
@@ -55,6 +57,39 @@ fn string_argument(input: &serde_json::Value, keys: &[&str]) -> Option<String> {
             .filter(|value| !value.is_empty())
             .map(str::to_string)
     })
+}
+
+/// Maps a tool call to a tutor-facing progress phrase, purely from the file
+/// path it touches — never the tool name or raw arguments, so nothing
+/// internal leaks into the UI regardless of the showToolCalls setting.
+/// Returns None for anything that doesn't match a known lesson-planning
+/// milestone; the frontend falls back to its own rotating filler text.
+fn progress_message_for_tool_call(
+    tool_name: &str,
+    arguments: Option<&serde_json::Value>,
+) -> Option<String> {
+    let path = arguments.and_then(|input| {
+        string_argument(input, &["path", "file", "file_path", "command"])
+    })?;
+
+    if path.contains("sounds.md") {
+        return Some("Checking known sounds…".to_string());
+    }
+    if path.contains("sight-words.md") {
+        return Some("Checking sight words…".to_string());
+    }
+    if path.contains("lesson-plans/") || path.contains("lesson-plans\\") {
+        return Some(match categorize_tool(tool_name) {
+            ToolCategory::Write => "Writing the lesson plan…".to_string(),
+            _ => "Reviewing recent lessons…".to_string(),
+        });
+    }
+    if path.ends_with(".md") && matches!(categorize_tool(tool_name), ToolCategory::Read) {
+        // A bare .md file outside sounds.md / sight-words.md / lesson-plans/
+        // is almost always the student profile.
+        return Some("Reading the student profile…".to_string());
+    }
+    None
 }
 
 fn platform_notification(result: &CallToolResult) -> Option<rmcp::model::ServerNotification> {
@@ -744,6 +779,19 @@ impl Operation for ToolExecutionOperation<'_> {
                 .tool_call
                 .clone()
                 .map_err(|e| anyhow!("tool call could not be parsed: {e}"))?;
+            let tool_input = tool_call
+                .arguments
+                .as_ref()
+                .map(|arguments| serde_json::Value::Object(arguments.clone()));
+            if let Some(progress) =
+                progress_message_for_tool_call(&tool_call.name, tool_input.as_ref())
+            {
+                emit.message(
+                    Message::assistant()
+                        .with_system_notification(SystemNotificationType::ProgressMessage, progress),
+                )
+                .await;
+            }
             let result = self
                 .dispatch_tool_call(
                     tool_call,
