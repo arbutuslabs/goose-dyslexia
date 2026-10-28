@@ -1,63 +1,71 @@
 <div align="center">
 
-# goose
+<img src="lira-branding/logo.png" alt="Lira" width="120">
 
-_your native open source AI agent — desktop app, CLI, and API — for code, workflows, and everything in between_
+# Lira
 
-<p align="center">
-  <a href="https://opensource.org/licenses/Apache-2.0"
-    ><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg"></a>
-  <a href="https://discord.gg/n8R5VaWDAn"
-    ><img src="https://img.shields.io/discord/1287729918100246654?logo=discord&logoColor=white&label=Join+Us&color=blueviolet" alt="Discord"></a>
-  <a href="https://github.com/aaif-goose/goose/actions/workflows/ci.yml"
-     ><img src="https://img.shields.io/github/actions/workflow/status/aaif-goose/goose/ci.yml?branch=main" alt="CI"></a>
-  <a href="https://insights.linuxfoundation.org/project/goose"><img src="https://insights.linuxfoundation.org/api/badge/health-score?project=goose"></a>
-  <a href="https://repology.org/project/goose-cli/versions"><img src="https://repology.org/badge/tiny-repos/goose-cli.svg" alt="Packaging status"></a>
-</p>
-
-<a href="https://trendshift.io/repositories/25298?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-25298" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/25298" alt="aaif-goose%2Fgoose | Trendshift" width="250" height="55"/></a>
+_A desktop agent that writes Orton-Gillingham lesson plans for dyslexia tutors, built on Block's open source goose._
 
 </div>
 
+Lira is a fork of [goose](https://github.com/aaif-goose/goose) (Rust agent core, Electron and React desktop app). It keeps goose's agent loop, providers and ACP protocol, and replaces everything a tutor sees and everything the model is told.
 
-goose is a general-purpose AI agent that runs on your machine. Not just for code — use it for research, writing, automation, data analysis, or anything you need to get done.
+The hard part of the problem is one rule: **every word in a student's materials must be readable using only the sounds and sight words that student already knows.** One unknown pattern in a sentence ("sat *down*", "a *cart*") breaks the lesson. Lira treats this as a constraint-satisfaction task and checks it twice before it hands a plan back.
 
-A native desktop app for macOS, Linux, and Windows. A full CLI for terminal workflows. An API to embed it anywhere. Built in Rust for performance and portability.
+## What a tutor does
 
-goose works with 15+ providers — Anthropic, OpenAI, Google, Ollama, OpenRouter, Azure, Bedrock, and more. Use API keys or your existing Claude, ChatGPT, or Gemini subscriptions via [ACP](https://goose-docs.ai/docs/guides/acp-providers). Connect to 70+ extensions via the [Model Context Protocol](https://modelcontextprotocol.io/) open standard.
+1. Pick a student. Each student is a folder: a profile, `sounds.md`, `sight-words.md`, and a `lesson-plans/` history.
+2. Ask for the next lesson.
+3. Lira reads the profile, the known-sound flags and the last three plans, writes the plan, and runs a decodability pass and a meaning pass over it.
+4. Export to PDF.
 
-goose is part of the [Agentic AI Foundation (AAIF)](https://aaif.io/) at the Linux Foundation.
+Tool calls and thinking blocks are hidden from the conversation by default, and a progress line ("Checking sight words…") shows what is happening in plain language.
 
-# Get started
+## What was built on top of goose
 
-**[Download the desktop app](https://goose-docs.ai/docs/getting-started/installation)** for macOS, Linux, and Windows.
+| Area | What changed |
+| --- | --- |
+| Prompting | Split system prompt and a lesson-planning guide written with dyslexia specialists. Rules are numbered and labeled so smaller models follow them reliably. |
+| Student workspace | Student picker, workspace scaffolding, and a per-chat files panel in place of the open chat hub. |
+| Tutor-facing UI | Tool calls and thinking hidden behind a setting. Navigation trimmed. Wordmark loader. |
+| Progress messages | The Rust agent maps a tool call's file path to a friendly phrase and sends it over goose's existing ACP progress channel, so internal tool names never reach the UI. |
+| Export | LaTeX template and script that render a plan onto a lesson form. |
+| Packaging | `lira://` protocol, bundle id, and auto-update pointed at this fork. |
+| Cost tooling | A batch script and CSV schema for comparing models on cost, rating and thinking effort. |
 
-Or install the CLI:
+[LIRA.md](LIRA.md) lists the files and commits behind each row.
+
+## Measured results
+
+These are from one paired run on one student, so treat them as indicative, not a benchmark.
+
+- Trimming the lesson-planning guide cut it from about 6,400 to about 2,500 tokens (62%) while keeping every rule.
+- With the same model and student, a full lesson plan took 402s with the trimmed guide against 635s with the original, and 8 agent turns against 17.
+- The default thinking-effort setting resolves to a 16k-token budget per turn on Anthropic models. Most turns are file reads and edits that gain nothing from it.
+
+## Try the format without the app
+
+[`examples/lira-demo`](examples/lira-demo) holds a fictional student and an abbreviated sample plan, so you can see what the model reads and what it produces.
+
+## Build and run
+
+You need the Rust toolchain from `rust-toolchain.toml`, Node 24, and pnpm.
 
 ```bash
-curl -fsSL https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh | bash
+cargo build --release -p goose-cli --bin goose
+cp target/release/goose ui/desktop/src/bin/goose
+cd ui/desktop && pnpm install && pnpm run start-gui
 ```
 
-# Quick links
-- [Quickstart](https://goose-docs.ai/docs/quickstart)
-- [Installation](https://goose-docs.ai/docs/getting-started/installation)
-- [Tutorials](https://goose-docs.ai/docs/category/tutorials)
-- [Documentation](https://goose-docs.ai/docs/category/getting-started)
-- [Governance](https://github.com/aaif-goose/goose/blob/main/GOVERNANCE.md)
-- [Custom Distributions](https://github.com/aaif-goose/goose/blob/main/CUSTOM_DISTROS.md) — build your own goose distro with preconfigured providers, extensions, and branding
+You also need an API key for at least one provider, set in the app.
 
-## Need help?
-- [Diagnostics & Reporting](https://goose-docs.ai/docs/troubleshooting/diagnostics-and-reporting)
-- [Known Issues](https://goose-docs.ai/docs/troubleshooting/known-issues)
+Toolchain notes from getting this running on a fresh machine:
 
-# a little goose humor 🪿
+- Node 22 is too old for the workspace. Use Node 24.10 or newer.
+- If corepack fails with "Cannot find matching keyid", run with `COREPACK_INTEGRITY_KEYS=0`.
+- Run `corepack enable` so nested install scripts can find `pnpm`, and set `CI=true` when pnpm needs to run without a TTY.
+- The Rust release build takes about ten minutes on a cold cache.
 
-> Why did the developer choose goose as their AI agent?
-> 
-> Because it always helps them "migrate" their code to production! 🚀
+## Credit and license
 
-# goose around with us
-- [Discord](https://discord.gg/n8R5VaWDAn)
-- [YouTube](https://www.youtube.com/@goose-oss)
-- [LinkedIn](https://www.linkedin.com/company/goose-oss)
-- [Twitter/X](https://x.com/goose_oss)
+Lira is built on goose, created by Block and now part of the Agentic AI Foundation, and is released under the same Apache 2.0 license. The original README is kept at [docs/UPSTREAM_README.md](docs/UPSTREAM_README.md). Lira is an independent project and is not affiliated with or endorsed by Block.
